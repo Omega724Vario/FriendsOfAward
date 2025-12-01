@@ -1,0 +1,31 @@
+﻿<nav class="sidebar" @(isCollapsed ? "collapsed" : "")>
+    <button class="toggle-btn" @onclick="ToggleMenu">☰</button>
+
+    <ul class="nav-list">
+        <li>
+            <NavLink href="/Home" class="nav-link" activeClass="active">
+                <!-- Icon kannst du hier einfügen -->
+                <span>Seite 1</span>
+            </NavLink>
+        </li>
+        <li>
+            <NavLink href="/page2" class="nav-link" activeClass="active">
+                <span>Seite 2</span>
+            </NavLink>
+        </li>
+        <li>
+            <NavLink href="/page3" class="nav-link" activeClass="active">
+                <span>Seite 3</span>
+            </NavLink>
+        </li>
+    </ul>
+</nav>
+
+@code {
+    private bool isCollapsed = false;
+
+    private void ToggleMenu()
+    {
+        isCollapsed = !isCollapsed;
+    }
+}
