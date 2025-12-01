@@ -1,4 +1,5 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 
 <PageTitle>Home</PageTitle>
 
@@ -8,6 +9,14 @@
 </div>
 <div id="wrapper">
 	<main id="content">
-
+		<h1>Friends of Award</h1>
+		<p>TODO HERE NEXT</p>
+		<div id="grid">
+			@for (int i = 0; i < 20; i++)
+			{
+				<div class="grid-btn">@i</div>
+			}
+		</div>
+		<button id="submit-btn">Bewertung absenden</button>
 	</main>
 </div>
