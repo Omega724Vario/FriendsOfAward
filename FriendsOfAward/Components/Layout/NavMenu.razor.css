@@ -1,0 +1,68 @@
+﻿.my-class {
+    color: red;     
+}
+
+.reset-container {
+    margin-top: auto; /* schiebt den Button ganz nach unten */
+    padding: 0; /* <-- entfernt den Abstand links/rechts */
+    margin-bottom: 2rem; /* hebt den Button etwas an */
+}
+
+
+.reset-btn {
+    width: 100%;
+    padding: 1rem; /* <-- verschiebt das Padding direkt auf den Button */
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 0; /* optional: entfernt Rundung, damit er bündig abschließt */
+    transition: background 0.3s, color 0.3s;
+
+}
+
+
+
+.reset-btn:hover {
+        background-color: rgba(231, 76, 60, 0.9); /* kräftiges Rot beim Hover */
+        color: white; /* Text bleibt weiß */
+}
+
+.sidebar {
+    width: 220px;
+    background: linear-gradient(to bottom, #1abc9c, #34495e);
+    color: white;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex; /* Sidebar wird Flexbox */
+    flex-direction: column; /* Elemente untereinander */
+}
+
+.sidebar.collapsed {
+        transform: translateX(-100%);
+}
+
+.active {
+    background-color: #ff6600;
+}
+
+.sidebar-header {
+    padding: 20px;
+    color: white;
+    text-align: center;
+    background-color: #0a7871;
+}
+
+    .sidebar-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+
+    .sidebar-header p {
+        margin: 5px 0 0;
+        font-size: 0.9rem;
+        color: #ccc;
+    }
