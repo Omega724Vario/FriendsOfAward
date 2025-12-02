@@ -1,8 +1,6 @@
-@import url('general-sans.css');
-
 body {
     margin: 0;
-    font-family: GeneralSans-Regular;
+    font-family: "Geist", sans-serif;
 }
 
 h1:focus {

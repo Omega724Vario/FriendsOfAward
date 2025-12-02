@@ -3,20 +3,80 @@
 
 <PageTitle>Home</PageTitle>
 
-<div id="blur-container">
-	<div class="blur-ball b1"></div>
-	<div class="blur-ball b2"></div>
-</div>
+
+<div id="blur-ball"></div>
 <div id="wrapper">
-	<main id="content">
-		<h1>Friends of Award</h1>
-		<p>TODO HERE NEXT</p>
+<main id="content">
+		<span id="title">Friends of Award</span>
+		<div id="note">
+			<b>
+				Geben Sie uns Ihre persönlichen Favoriten bekannt!<br />
+				Einfacher Klick = Favorit (max. 5)<br />
+				Doppelklick = Topfavorit (max. 1)<br />
+			</b>
+			Diese Abstimmung ist anonym und auf ein Gerät beschränkt.<br />
+		</div>
 		<div id="grid">
-			@for (int i = 0; i < 20; i++)
+            @for (int i = 0; i < dips.Count; i++)
 			{
-				<div class="grid-btn">@i</div>
+                int currentIndex = i;
+                <div title="@dips[i].Name" class="grid-btn @(dips[i].State)" @onclick="() => Btn_SetFavourite(currentIndex)">
+                    @(i + 1)
+                </div>
 			}
 		</div>
 		<button id="submit-btn">Bewertung absenden</button>
 	</main>
 </div>
+
+@code {
+    List<Dip> dips = [];
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        for (int i = 0; i < 20; i++)
+        {
+            Dip dip = new("This is the name " + Random.Shared.Next(0, 100).ToString());
+            dips.Add(dip);
+        }
+    }
+
+    void Btn_SetFavourite(int index)
+    {
+        int favoriteCount = dips.FindAll(d => d.State == "favorite").Count;
+        if (dips[index].State == "" && favoriteCount < 5)
+        {
+            dips[index].State = "favorite";
+        }
+        else if (dips[index].State == "favorite")
+        {
+            foreach (Dip dip in dips)
+            {
+                if (dip.State == "topfavorite")
+                {
+                    if (favoriteCount < 5) dip.State = "favourite";
+                    else dip.State = "";
+                    break;
+                }
+            }
+            dips[index].State = "topfavorite";
+        }
+        else
+        {
+            dips[index].State = "";
+        }
+    }
+
+    class Dip
+    {
+        public string Name { get; }
+        public string State { get; set; }
+
+        public Dip(string name)
+        {
+            Name = name;
+            State = "";
+        }
+    }
+}
