@@ -6,4 +6,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Components\Pages\Teilnehmer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Components\Pages\Teilnehmer-razor" />
+  </ItemGroup>
+
 </Project>

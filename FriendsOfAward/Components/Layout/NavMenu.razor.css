@@ -34,7 +34,7 @@
     background: linear-gradient(to bottom, #1abc9c, #34495e);
     color: white;
     height: 100vh;
-    position: fixed;
+/*    position: fixed;*/
     top: 0;
     left: 0;
     display: flex; /* Sidebar wird Flexbox */
@@ -45,9 +45,6 @@
         transform: translateX(-100%);
 }
 
-.active {
-    background-color: #ff6600;
-}
 
 .sidebar-header {
     padding: 20px;

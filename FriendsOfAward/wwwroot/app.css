@@ -1,3 +1,7 @@
+body {
+    margin: 0;
+}
+
 h1:focus {
     outline: none;
 }
@@ -52,22 +56,8 @@ h1:focus {
 }
 
 
-
-
-
-
-
-
-
-    text-decoration: none;
-    transition: background 0.2s;
+.content-container {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
 }
-
-    .nav-link:hover {
-        background-color: #26b050;
-    }
-
-.active {
-    background-color: #ff6600;
-}
-

@@ -37,16 +37,5 @@
 }
 
 /* Sidebar links */
-.sidebar-container {
-    width: 220px;
-    background: linear-gradient(to bottom, rgb(5,72,72), rgb(94,162,232));
-    color: white;
-    flex-shrink: 0;
-}
 
 /* Inhalt rechts */
-.content-container {
-    flex-grow: 1;
-    padding: 1rem;
-    overflow-y: auto;
-}
