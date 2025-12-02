@@ -1,3 +1,17 @@
+.page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.main{
+    felx:1;
+}
+
+.sidebar {
+    background-color: #f8f9fa;
+}
+
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -10,9 +24,29 @@
     z-index: 1000;
 }
 
-    #blazor-error-ui .dismiss {
+#blazor-error-ui .dismiss {
         cursor: pointer;
         position: absolute;
         right: 0.75rem;
         top: 0.5rem;
-    }
+}
+
+.app-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar links */
+.sidebar-container {
+    width: 220px;
+    background: linear-gradient(to bottom, rgb(5,72,72), rgb(94,162,232));
+    color: white;
+    flex-shrink: 0;
+}
+
+/* Inhalt rechts */
+.content-container {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
