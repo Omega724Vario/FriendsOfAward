@@ -11,8 +11,8 @@
 		<div id="note">
 			<b>
 				Geben Sie uns Ihre persönlichen Favoriten bekannt!<br />
-				Einfacher Klick = Favorit (max. 5)<br />
-				Doppelklick = Topfavorit (max. 1)<br />
+				@* Einmal klicken = Favorit (max. 5)<br />
+				Nochmal klicken = Topfavorit (max. 1)<br /> *@
 			</b>
 			Diese Abstimmung ist anonym und auf ein Gerät beschränkt.<br />
 		</div>
@@ -25,12 +25,34 @@
                 </div>
 			}
 		</div>
+        <div id="select-btn-container">
+            <button class="select-btn @(selectFavs ? "highlight" : "")" @onclick="() => selectFavs = true">
+                Favoriten wählen (@GetFavoriteCount()/5)
+            </button>
+            <button class="select-btn @(selectFavs ? "" : "highlight")" @onclick="() => selectFavs = false">
+                Topfavorit wählen (@GetTopfavoriteCount()/1)
+            </button>
+        </div>
+            @if (selectFavs) {
+                <div id="note">Wähle Favoriten aus!</div>
+            }
+            else
+            {
+                <div id="note">Wähle einen Topfavoriten aus!</div>
+            }
+            @if (favError) {
+                <div id="note" style="color: #ff5858">
+                    5 von 5 Favoriten ausgewählt.
+                </div>
+            }
 		<button id="submit-btn">Bewertung absenden</button>
 	</main>
 </div>
 
 @code {
     List<Dip> dips = [];
+    bool selectFavs = true;
+    bool favError = false;
 
     protected override void OnInitialized()
     {
@@ -44,28 +66,54 @@
 
     void Btn_SetFavourite(int index)
     {
-        int favoriteCount = dips.FindAll(d => d.State == "favorite").Count;
-        if (dips[index].State == "" && favoriteCount < 5)
+        favError = false;
+        if (selectFavs)
         {
-            dips[index].State = "favorite";
-        }
-        else if (dips[index].State == "favorite")
-        {
-            foreach (Dip dip in dips)
+            if (dips[index].State == "favorite")
             {
-                if (dip.State == "topfavorite")
+                dips[index].State = "";
+            }
+            else if (dips[index].State != "topfavorite")
+            {
+                if (GetFavoriteCount() < 5)
                 {
-                    if (favoriteCount < 5) dip.State = "favourite";
-                    else dip.State = "";
-                    break;
+                    dips[index].State = "favorite";
+                }
+                else
+                {
+                    favError = true;
                 }
             }
-            dips[index].State = "topfavorite";
         }
         else
         {
-            dips[index].State = "";
+            if (dips[index].State == "topfavorite")
+            {
+                dips[index].State = "";
+            }
+            else
+            {
+                foreach (Dip d in dips)
+                {
+                    if (d.State == "topfavorite")
+                    {
+                        d.State = "";
+                        break;
+                    }
+                }
+                dips[index].State = "topfavorite";
+            }
         }
+    }
+
+    int GetFavoriteCount()
+    {
+        return dips.FindAll(d => d.State == "favorite").Count;
+    }
+
+    int GetTopfavoriteCount()
+    {
+        return dips.FindAll(d => d.State == "topfavorite").Count;
     }
 
     class Dip
