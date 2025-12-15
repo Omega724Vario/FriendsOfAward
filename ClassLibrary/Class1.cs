@@ -1,4 +1,6 @@
-﻿public class FoA_FriendsofAward
+﻿using ZstdSharp.Unsafe;
+
+public class FoA_FriendsofAward
 {
     int ID { get; }
     string Titel { get; set; }
@@ -13,12 +15,20 @@
         Count = count;
     }
 
-    static string SaveToDb(FoA_FriendsofAward foaDA)
+    static bool SaveToDb(FoA_FriendsofAward foaDA)
     {
-        DbWrapper.Wrapper.Open();
-        DbWrapper.Wrapper.RunNonQuery($"CREATE TABLE IF NOT EXISTS FoA_FriendsOfAward (Nr AUTO_INCREMENT, " +
-            $"Titel VARCHAR(100) NOT NULL, Schueler VARCHAR(200) NOT NULL");
-        DbWrapper.Wrapper.RunNonQuery($"INSERT INTO VALUES {foaDA}");
-        return "ok"; 
+        try
+        {
+            DbWrapper.Wrapper.Open();
+            DbWrapper.Wrapper.RunNonQuery($"CREATE TABLE IF NOT EXISTS FoA_FriendsOfAward (Nr AUTO_INCREMENT, " +
+                $"Titel VARCHAR(100) NOT NULL, Schueler VARCHAR(200) NOT NULL");
+            DbWrapper.Wrapper.RunNonQuery($"INSERT INTO VALUES {foaDA}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return false;
+        }
     }
 }
