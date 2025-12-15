@@ -14,4 +14,8 @@
     <None Remove="Components\Pages\Teilnehmer-razor" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\FriendsOfAwardLib\FriendsOfAwardLib.csproj" />
+  </ItemGroup>
+
 </Project>
