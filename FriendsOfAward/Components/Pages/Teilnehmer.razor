@@ -1,10 +1,144 @@
-﻿@page "/Teilnehmer"
+﻿@rendermode InteractiveServer
+@page "/Teilnehmer"
+@inject IJSRuntime JS
+@inject NavigationManager NavMananger
+@using QRCoder;
+@using System.Diagnostics
+@using System.Text
+
 
 <PageTitle>Teilnehmer</PageTitle>
 
 
-<h3>Teilnehmer</h3>
+<h2 class="headline-bg">Teilnehmer</h2>
+
+<h1 class="subheadline">QR-Codes:</h1>
+
+<div>
+
+<label for="qrCode_Number" class="big-label"> Anzahl:  </label>
+<input type="number"  id="qrCode_Number" @bind="qrCode_Number" />
+<span class="@(string.IsNullOrEmpty(errorMessage) ? "" : "errorMessage")">@errorMessage</span>
+<br/>
+<button type="button" class="btn_generateQRCode" @onclick="Btn_QRCodesGenerieren">QR-Codes erstellen</button>
+
+    @if (qrCodeList.Count > 0)
+    {
+        <button class="btn_generateQRCode" @onclick="DownloadHtml">
+            QR-Codes herunterladen
+        </button>
+    }
+
+</div>
+
+    <h3>Erzeugte QR-Codes:</h3>
+<div style="display:flex; flex-wrap:wrap; gap:20px;">
+    @for (int i = 0; i < qrCodeList.Count; i++)
+    {
+        <div style="text-align:center;">
+            <img src="data:image/png;base64,@qrCodeList[i]"
+                 style="width:180px; height:180px; border:1px solid #ccc;" />
+            <div>@passwordList[i]</div>
+        </div>
+    }
+</div>
+
 
 @code {
+    private string btnClick = "";
+    private int qrCode_Number;
+    private string errorMessage;
+    private List<dynamic> qrCodeList = new();
+    private List<string> passwordList = new();
+    private string? QrPngBase64;
+
+
+
+    protected override void OnInitialized()
+    {
+    }
+
+
+    private void Btn_QRCodesGenerieren()
+    {
+        string password = "";
+        errorMessage = "";
+        if (!(qrCode_Number >= 1))
+        {
+            errorMessage = "Bitte gültige Anzahl eingeben (1-999)";
+        }
+        qrCodeList.Clear();
+        passwordList.Clear();
+        for (int i = 0; i < qrCode_Number; i++)
+        {
+            password = Guid.NewGuid().ToString();
+            password = password.Substring(0, 8);
+            Debug.Write("Passwort: " + password + "\n");
+            passwordList.Add(password);
+
+
+            var UrlPayloud = new PayloadGenerator.Url(NavMananger.BaseUri + "User/" + password);
+            string payload = UrlPayloud.ToString();
+
+            QRCodeGenerator qrGenerator = new QRCodeGenerator();
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(payload, QRCodeGenerator.ECCLevel.Q);
+            QRCode qrCode = new QRCode(qrCodeData);
+
+            using (var qrCodeAsBitmap = qrCode.GetGraphic(20))
+            {
+                using (var ms = new MemoryStream())
+                {
+                    qrCodeAsBitmap.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+                    string base64 = Convert.ToBase64String(ms.ToArray());
+                    qrCodeList.Add(base64);
+                    Console.WriteLine($"Base64 length: {base64.Length}");
+                }
+            }
+        }
+    }
+
+    private async Task DownloadHtml()
+    {
+        var sb = new StringBuilder();
+
+        sb.AppendLine("<!DOCTYPE html>");
+        sb.AppendLine("<html lang=\"de\"><head><meta charset=\"UTF-8\"><title>QR-Codes</title>");
+        sb.AppendLine("<style>body{text-align:center;font-family:Arial;} img{width:250px;height:250px;border:1px solid #ccc;} button{margin:10px;padding:10px;}</style>");
+        sb.AppendLine("</head><body>");
+        sb.AppendLine("<h1>QR-Codes</h1>");
+        sb.AppendLine("<img id=\"qrImage\" src=\"\" alt=\"QR-Code\" />");
+        sb.AppendLine("<div id=\"qrLabel\"></div>");
+        sb.AppendLine("<div><button onclick=\"prevCode()\">Zurück</button><button onclick=\"nextCode()\">Weiter</button></div>");
+        sb.AppendLine("<script>");
+        sb.AppendLine("const qrCodes = [];");
+
+        for (int i = 0; i < qrCodeList.Count; i++)
+        {
+            var safe = qrCodeList[i]
+            .Replace("\\", "\\\\")
+                .Replace("\"", "\\\"")
+                .Replace("'", "\\'")
+                .Replace("</script>", "<\\/script>");
+
+            sb.AppendLine($"qrCodes.push(\"data:image/png;base64,{safe}\");");
+        }
+
+        sb.AppendLine("let currentIndex = 0;");
+        sb.AppendLine("function showCode(i){document.getElementById('qrImage').src=qrCodes[i];document.getElementById('qrLabel').textContent='QR-Code Nr. '+(i+1);} ");
+        sb.AppendLine("function prevCode(){if(currentIndex>0){currentIndex--;showCode(currentIndex);}} ");
+        sb.AppendLine("function nextCode(){if(currentIndex<qrCodes.length-1){currentIndex++;showCode(currentIndex);}} ");
+        sb.AppendLine("showCode(currentIndex);");
+        sb.AppendLine("</script>");
+        sb.AppendLine("</body></html>");
+
+        var html = sb.ToString();
+        var bytes = Encoding.UTF8.GetBytes(html);
+        var base64 = Convert.ToBase64String(bytes);
+
+        Console.WriteLine("HTML size: " + html.Length);
+
+
+        await JS.InvokeVoidAsync("downloadHtmlFile", "qrcodes.html", html);
+    }
 
 }
