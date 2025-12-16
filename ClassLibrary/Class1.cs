@@ -1,28 +1,83 @@
-﻿using ZstdSharp.Unsafe;
+﻿using Mysqlx.Connection;
+using ZstdSharp.Unsafe;
 
-public class FoA_FriendsofAward
+public class FoA_DA
 {
-    int ID { get; }
+    int ID { get; } //in als NULL übergeben, Auto_Increment via sql
     string Titel { get; set; }
     string Schueler { get; set; }
-    int Count { get; set; }
 
-    public FoA_FriendsofAward(int id, string titel, string schueler, int count)
+    public FoA_DA(int id, string titel, string schueler)
     {
         ID = id;
         Titel = titel;
         Schueler = schueler;
-        Count = count;
     }
 
-    static bool SaveToDb(FoA_FriendsofAward foaDA)
+    static bool SaveDAtoDb(FoA_DA foaDA)
     {
         try
         {
-            DbWrapper.Wrapper.Open();
-            DbWrapper.Wrapper.RunNonQuery($"CREATE TABLE IF NOT EXISTS FoA_FriendsOfAward (Nr AUTO_INCREMENT, " +
-                $"Titel VARCHAR(100) NOT NULL, Schueler VARCHAR(200) NOT NULL");
-            DbWrapper.Wrapper.RunNonQuery($"INSERT INTO VALUES {foaDA}");
+            CreateClassesSQL();
+            DbWrapper.Wrapper.RunNonQuery(
+                $"INSERT INTO FoA_DA (DaId, Titel, Schueler) VALUES ('NULL', '{foaDA.Titel}', '{foaDA.Schueler}')");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return false;
+        }
+    }
+    public class FoA_QrCodes
+    {
+        string QrId { get; set; }
+        bool Used { get; set; }
+        public FoA_QrCodes(string qrId, bool used)
+        {
+            QrId = qrId;
+            Used = used;
+        }
+        static bool SaveQRtoDb(FoA_QrCodes qrCodes)
+        {
+            try
+            {
+                CreateClassesSQL();
+                DbWrapper.Wrapper.RunNonQuery($"INSERT INTO FoA_QrCodes (QrID, IsUsed) VALUES ('{qrCodes.QrId}', '{qrCodes.Used}')");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
+        }
+    }
+    public class FoA_Voting_System
+    {
+        int VotingId { get; }
+        string QrId { get; }
+        int DaId { get; }
+
+        public FoA_Voting_System(int votingId, string qrId, int daId)
+        {
+            VotingId = votingId;
+            QrId = qrId;
+            DaId = daId;
+        }
+    }
+    static bool CreateClassesSQL()
+    {
+        try
+        {
+            DbWrapper.Wrapper.RunNonQuery($"CREATE TABLE IF NOT EXISTS FoA_DA (DaId INT NOT NULL AUTO_INCREMENT, " +
+                $"Titel VARCHAR(100) NOT NULL, Schueler VARCHAR(200) NOT NULL, PRIMARY KEY (DaId)");
+            DbWrapper.Wrapper.RunNonQuery($"CREATE TABLE IF NOT EXISTS FoA_QrCodes " +
+                $"(QrID VARCHAR(10) NOT NULL, used BOOLEAN DEFAULT FALSE, PRIMARY KEY(QrID)");
+            DbWrapper.Wrapper.RunNonQuery($"CREATE TABLE if NOT EXISTS FoA_Voting_System " +
+                $"(VotingId INT NOT NULL AUTO_INCREMENT, QrId VARCHAR(10) NOT NULL, DaId INT NOT NULL, " +
+                $"PRIMARY KEY (VotingId), FOREIGN KEY (QrId) REFERENCES FoA_QrCodes (QrId) ON DELETE CASCADE, " +
+                $"FOREIGN KEY (DaId) REFERENCES FoA_DA (DaId) ON DELETE CASCADE");
             return true;
         }
         catch (Exception ex)
