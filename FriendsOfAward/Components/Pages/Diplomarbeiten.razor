@@ -1,10 +1,36 @@
 ﻿@page "/Diplomarbeiten"
+@rendermode InteractiveServer
 
 <PageTitle>Diplomarbeiten</PageTitle>
 
 
 <h3>Diplomarbeiten</h3>
+<form>
+    Diplomarbeiten einlesen:
+    <button type="button" @onclick="Btn_DAEinlesen">
+        Inkrementiere!
+    </button>
+
+</form>
+
 
 @code {
+    string comment = ""; 
+    string path = "../../Diplomarbeiten"; 
 
+
+    /*
+    Ein Admin kann eine Excel-Datei in die Datenbank laden, mit den Spalten:
+        Nr|AbteilungKürzel|Titel|Autor:innen
+        Das ist dann die aktuelle Liste der Diplomarbeiten zur Auswahl. 
+        Beim Laden wird der aktuelle Inhalt in der DB vollständig ersetzt.
+    */
+private void Btn_DAEinlesen(string path)
+    {
+        List<FoA_DA> elementsDA = new List<FoA_DA>();
+        elementsDA.Add(new FoA_DA(0, "Wii", "ho", "HalloSwen"));
+        bool isWorking = FoA_DA.SaveDAtoDb(elementsDA);
+        if (isWorking == false) comment = "The upload to the database didn't work"; //enum Fehlercodes?
+        else comment = "upload complete";
+    }
 }
