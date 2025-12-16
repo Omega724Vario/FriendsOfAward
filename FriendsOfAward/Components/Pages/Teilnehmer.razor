@@ -110,6 +110,7 @@
         sb.AppendLine("<div id=\"qrLabel\"></div>");
         sb.AppendLine("<div><button onclick=\"prevCode()\">Zurück</button><button onclick=\"nextCode()\">Weiter</button></div>");
         sb.AppendLine("<script>");
+        sb.AppendLine("const qrCodeIds = [];");
         sb.AppendLine("const qrCodes = [];");
 
         for (int i = 0; i < qrCodeList.Count; i++)
@@ -121,10 +122,11 @@
                 .Replace("</script>", "<\\/script>");
 
             sb.AppendLine($"qrCodes.push(\"data:image/png;base64,{safe}\");");
+            sb.AppendLine($"qrCodeIds.push(\"{passwordList[i]}\")");
         }
 
         sb.AppendLine("let currentIndex = 0;");
-        sb.AppendLine("function showCode(i){document.getElementById('qrImage').src=qrCodes[i];document.getElementById('qrLabel').textContent='QR-Code Nr. '+(i+1);} ");
+        sb.AppendLine("function showCode(i){document.getElementById('qrImage').src=qrCodes[i];document.getElementById('qrLabel').textContent=qrCodeIds[i];} ");
         sb.AppendLine("function prevCode(){if(currentIndex>0){currentIndex--;showCode(currentIndex);}} ");
         sb.AppendLine("function nextCode(){if(currentIndex<qrCodes.length-1){currentIndex++;showCode(currentIndex);}} ");
         sb.AppendLine("showCode(currentIndex);");
