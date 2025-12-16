@@ -6,23 +6,25 @@ using ZstdSharp.Unsafe;
 public class FoA_DA
 {
     int ID { get; } //in als NULL übergeben, Auto_Increment via sql
+    string Abteilung { get; }
     string Titel { get; set; }
     string Schueler { get; set; }
 
-    public FoA_DA(int id, string titel, string schueler)
+    public FoA_DA(int id, string abteilung, string titel, string schueler)
     {
         ID = id;
+        Abteilung = abteilung;
         Titel = titel;
         Schueler = schueler;
     }
 
-    static bool SaveDAtoDb(FoA_DA foaDA)
+    public static bool SaveDAtoDb(FoA_DA foaDA)
     {
         try
         {
             CreateClassesSQL();
             DbWrapper.Wrapper.RunNonQuery(
-                $"INSERT INTO FoA_DA (DaId, Titel, Schueler) VALUES ('NULL', '{foaDA.Titel}', '{foaDA.Schueler}')");
+                $"INSERT INTO FoA_DA (DaId, Abteilung, Titel, Schueler) VALUES ('NULL', '{foaDA.Abteilung}', '{foaDA.Titel}', '{foaDA.Schueler}')");
             return true;
         }
         catch (Exception ex)
@@ -38,12 +40,15 @@ public class FoA_DA
         {
             QrId = qrId;
         }
-        static bool SaveQRtoDb(FoA_QrCodes qrCodes)
+        static bool SaveQRtoDb(List<FoA_QrCodes> qrCodes)
         {
             try
             {
                 CreateClassesSQL();
-                DbWrapper.Wrapper.RunNonQuery($"INSERT INTO FoA_QrCodes (QrID) VALUES ('{qrCodes.QrId}')");
+                foreach(FoA_QrCodes qrCode in qrCodes)
+                {
+                    DbWrapper.Wrapper.RunNonQuery($"INSERT INTO FoA_QrCodes (QrID) VALUES ('{qrCode.QrId}')");
+                }
                 return true;
             }
             catch (Exception ex)
@@ -70,7 +75,7 @@ public class FoA_DA
     {
         try
         {
-            DbWrapper.Wrapper.RunNonQuery($"CREATE TABLE IF NOT EXISTS FoA_DA (DaId INT NOT NULL AUTO_INCREMENT, " +
+            DbWrapper.Wrapper.RunNonQuery($"CREATE TABLE IF NOT EXISTS FoA_DA (DaId INT NOT NULL AUTO_INCREMENT, Abteilung VARCHAR(3) NOT NULL" +
                 $"Titel VARCHAR(100) NOT NULL, Schueler VARCHAR(200) NOT NULL, PRIMARY KEY (DaId)");
             DbWrapper.Wrapper.RunNonQuery($"CREATE TABLE IF NOT EXISTS FoA_QrCodes " +
                 $"(QrID VARCHAR(8) NOT NULL, PRIMARY KEY(QrID)");
@@ -99,5 +104,4 @@ public class FoA_DA
         }
         return qrIds; 
     }
-
 }
