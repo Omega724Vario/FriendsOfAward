@@ -1,4 +1,6 @@
-﻿using Mysqlx.Connection;
+﻿using MySql.Data.MySqlClient;
+using Mysqlx.Connection;
+using System.Data;
 using ZstdSharp.Unsafe;
 
 public class FoA_DA
@@ -32,18 +34,16 @@ public class FoA_DA
     public class FoA_QrCodes
     {
         string QrId { get; set; }
-        bool Used { get; set; }
-        public FoA_QrCodes(string qrId, bool used)
+        public FoA_QrCodes(string qrId)
         {
             QrId = qrId;
-            Used = used;
         }
         static bool SaveQRtoDb(FoA_QrCodes qrCodes)
         {
             try
             {
                 CreateClassesSQL();
-                DbWrapper.Wrapper.RunNonQuery($"INSERT INTO FoA_QrCodes (QrID, IsUsed) VALUES ('{qrCodes.QrId}', '{qrCodes.Used}')");
+                DbWrapper.Wrapper.RunNonQuery($"INSERT INTO FoA_QrCodes (QrID) VALUES ('{qrCodes.QrId}')");
                 return true;
             }
             catch (Exception ex)
@@ -73,9 +73,9 @@ public class FoA_DA
             DbWrapper.Wrapper.RunNonQuery($"CREATE TABLE IF NOT EXISTS FoA_DA (DaId INT NOT NULL AUTO_INCREMENT, " +
                 $"Titel VARCHAR(100) NOT NULL, Schueler VARCHAR(200) NOT NULL, PRIMARY KEY (DaId)");
             DbWrapper.Wrapper.RunNonQuery($"CREATE TABLE IF NOT EXISTS FoA_QrCodes " +
-                $"(QrID VARCHAR(10) NOT NULL, used BOOLEAN DEFAULT FALSE, PRIMARY KEY(QrID)");
+                $"(QrID VARCHAR(8) NOT NULL, PRIMARY KEY(QrID)");
             DbWrapper.Wrapper.RunNonQuery($"CREATE TABLE if NOT EXISTS FoA_Voting_System " +
-                $"(VotingId INT NOT NULL AUTO_INCREMENT, QrId VARCHAR(10) NOT NULL, DaId INT NOT NULL, " +
+                $"(VotingId INT NOT NULL AUTO_INCREMENT, QrId VARCHAR(8) NOT NULL, DaId INT NOT NULL, " +
                 $"PRIMARY KEY (VotingId), FOREIGN KEY (QrId) REFERENCES FoA_QrCodes (QrId) ON DELETE CASCADE, " +
                 $"FOREIGN KEY (DaId) REFERENCES FoA_DA (DaId) ON DELETE CASCADE");
             return true;
@@ -86,4 +86,18 @@ public class FoA_DA
             return false;
         }
     }
+
+    static List<string> UnUsedQrCodes ()
+    {
+        List<string> qrIds = new List<string>();
+
+        DataTable table = DbWrapper.Wrapper.RunQuery($"SELECT QrId FROM FoA_QrCodes " +
+            $"WHERE QrId NOT IN (SELECT QrId FROM FoA_Voting_System)");
+        foreach (DataRow row in table.Rows)
+        {
+            qrIds.Add(row["QrId"].ToString());
+        }
+        return qrIds; 
+    }
+
 }
