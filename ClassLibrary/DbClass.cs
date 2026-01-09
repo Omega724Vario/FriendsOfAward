@@ -18,13 +18,14 @@ public class FoA_DA
         Schueler = schueler;
     }
 
-    public static bool SaveDAtoDb(FoA_DA foaDA)
+    public static bool SaveDAtoDb(List<FoA_DA> foaDA)
     {
         try
         {
             CreateClassesSQL();
+            foreach(FoA_DA da in foaDA)
             DbWrapper.Wrapper.RunNonQuery(
-                $"INSERT INTO FoA_DA (DaId, Abteilung, Titel, Schueler) VALUES ('NULL', '{foaDA.Abteilung}', '{foaDA.Titel}', '{foaDA.Schueler}')");
+                $"INSERT INTO FoA_DA (Abteilung, Titel, Schueler) VALUES ('{da.Abteilung}', '{da.Titel}', '{da.Schueler}')");
             return true;
         }
         catch (Exception ex)

@@ -1,36 +1,77 @@
 ﻿@page "/Diplomarbeiten"
+@using ClosedXML.Excel
 @rendermode InteractiveServer
 
 <PageTitle>Diplomarbeiten</PageTitle>
-
-
 <h3>Diplomarbeiten</h3>
-<form>
-    Diplomarbeiten einlesen:
-    <button type="button" @onclick="Btn_DAEinlesen">
-        Inkrementiere!
-    </button>
 
-</form>
+<div class="dropzone">
+    <p>Dateien hier ablegen oder klicken</p>
+
+    <InputFile OnChange="SelectedFile"
+               accept=".xlsx"
+               multiple="false" /> <!--eventuell true? Nachsehen wie es funktioniert-->
+</div>
+
+<button type="button" @onclick="Btn_DAEinlesen">
+    Diplomarbeiten einlesen
+</button>
+
+<p>@comment</p>
 
 
 @code {
-    string comment = ""; 
-    string path = "../../Diplomarbeiten"; 
+    private IBrowserFile? uploadedFile;
+    private string comment = "";
 
+    // Datei wird in variable gespeichert
+    async Task SelectedFile(InputFileChangeEventArgs e)
+    {
+        uploadedFile = e.File;
+        comment = $"Excel-Datei geladen: {uploadedFile.Name}";
+    }
 
     /*
-    Ein Admin kann eine Excel-Datei in die Datenbank laden, mit den Spalten:
-        Nr|AbteilungKürzel|Titel|Autor:innen
-        Das ist dann die aktuelle Liste der Diplomarbeiten zur Auswahl. 
-        Beim Laden wird der aktuelle Inhalt in der DB vollständig ersetzt.
-    */
-private void Btn_DAEinlesen(string path)
+Ein Admin kann eine Excel-Datei in die Datenbank laden, mit den Spalten:
+    Nr|AbteilungKürzel|Titel|Autor:innen
+    Das ist dann die aktuelle Liste der Diplomarbeiten zur Auswahl.
+    Beim Laden wird der aktuelle Inhalt in der DB vollständig ersetzt.
+*/
+    async Task Btn_DAEinlesen()
     {
-        List<FoA_DA> elementsDA = new List<FoA_DA>();
-        elementsDA.Add(new FoA_DA(0, "Wii", "ho", "HalloSwen"));
-        bool isWorking = FoA_DA.SaveDAtoDb(elementsDA);
-        if (isWorking == false) comment = "The upload to the database didn't work"; //enum Fehlercodes?
-        else comment = "upload complete";
+        if (uploadedFile == null)
+        {
+            comment = "Keine Excel-Datei ausgewählt";
+            return;
+        }
+
+        List<FoA_DA> list = await ReadFile(uploadedFile);
+
+        bool isWorking = FoA_DA.SaveDAtoDb(list);
+        comment = isWorking ? "Upload erfolgreich" : "Fehler beim Speichern";
+    }
+
+    async Task<List<FoA_DA>> ReadFile(IBrowserFile file)
+    {
+        List<FoA_DA> result = new List<FoA_DA>();
+
+            using Stream? stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); //max size = 10MB (damit Benutzer ned zu große Datein hochladen können)
+            using IXLWorkbook workbook = new XLWorkbook(stream); //workbook == excel object
+            IXLWorksheet sheet = workbook.Worksheets.First();
+
+            var rows = sheet.RangeUsed().RowsUsed().Skip(1); //alle verwendeten Zeilen/Spalten (erste mit Überschrift wird geskipped)
+
+            foreach (var row in rows)
+            {
+                result.Add(new FoA_DA(
+                    row.Cell(1).GetValue<int>(),
+                    row.Cell(2).GetString(),
+                    row.Cell(3).GetString(),
+                    row.Cell(4).GetString()
+                ));
+            }
+
+            return result;
+        }
     }
 }
