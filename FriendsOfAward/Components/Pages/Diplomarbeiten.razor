@@ -5,11 +5,14 @@
 <PageTitle>Diplomarbeiten</PageTitle>
 <h3>Diplomarbeiten</h3>
 
+
+<form>
 <div class="dropzone">
     <p>Dateien hier ablegen oder klicken</p>
     <InputFile OnChange="SelectedFile"
                accept=".xlsx"
                multiple="false" /> <!--eventuell true? Nachsehen wie es funktioniert-->
+               <!--Update: nicht nötig, immer nur eine eingegeben-->
 </div>
 
 <button type="button" @onclick="Btn_DAEinlesen">Diplomarbeiten einlesen</button>
@@ -27,12 +30,37 @@
         <span class="visually-hidden">Loading...</span>
     </div>
 }
+<!--Eingescannte Datensätze anzeigen-->
+<table>
+    @if (result.Count != 0)
+    {
+        <tr>
+            <th>Nr</th>
+            <th>Abteilung</th>
+            <th>Titel</th>
+            <th>Schüler</th>
+        </tr>
+
+        @foreach (FoA_DA da in result)
+        {
+            <tr>
+                <td> @da.ID </td>
+                <td> @da.Abteilung </td>
+                <td> @da.Titel </td>
+                <td> @da.Schueler </td>
+            </tr>
+        }
+    }    
+</table>
+</form>
 
 @code {
     private IBrowserFile? uploadedFile;
     private string comment = "";
     private string errorMessage = "";
     private bool isProcessing = false;
+    List<FoA_DA> result = new List<FoA_DA>();
+
 
     // Datei wird in variable gespeichert
     async Task SelectedFile(InputFileChangeEventArgs e)
@@ -74,11 +102,11 @@
             //Inhalt wird gelesen und geprüft
             List<FoA_DA> list = await ReadFile(uploadedFile);
 
-            if (list.Count == 0)
+            if(list.Count == 0)
             {
                 comment = "Keine Daten in der Excel-Datei gefunden";
                 StateHasChanged();
-                return;
+                return; 
             }
             // Datei hat Inhalt und kann in DB gespeichert werden
             bool isWorking = FoA_DA.SaveDAtoDb(list);
@@ -90,21 +118,19 @@
             errorMessage = $"Fehler: {ex.Message}";
             comment = "Einlesen fehlgeschlagen";
             StateHasChanged();
-        }
+        } 
         isProcessing = false;
         StateHasChanged();
     }
 
     async Task<List<FoA_DA>> ReadFile(IBrowserFile file)
     {
-        List<FoA_DA> result = new List<FoA_DA>();
-
         try
         {
             using Stream? stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); //max size = 10MB (damit Benutzer ned zu große Datein hochladen können)
             using MemoryStream memorystream = new MemoryStream();
             await stream.CopyToAsync(memorystream);
-            memorystream.Position = 0;
+            memorystream.Position = 0; 
             using IXLWorkbook workbook = new XLWorkbook(memorystream); //workbook == excel object
             IXLWorksheet sheet = workbook.Worksheets.First();
 
@@ -130,7 +156,7 @@
             comment = "Inhalt fehlerhaft";
             StateHasChanged();
         }
-
+        
         return result;
     }
 }

@@ -7,7 +7,7 @@ using ZstdSharp.Unsafe;
 
 public class FoA_DA
 {
-    public int ID { get; set; } //in als NULL übergeben, Auto_Increment via sql
+    public int ID { get; } //in als NULL übergeben, Auto_Increment via sql
     public string Abteilung { get; set; }
     public string Titel { get; set; }
     public string Schueler { get; set; }
