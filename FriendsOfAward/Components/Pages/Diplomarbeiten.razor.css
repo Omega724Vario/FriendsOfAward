@@ -1,19 +1,5 @@
-﻿.dropzone {
-    border: 2px dashed #ccc;
-    border-radius: 10px;
-    padding: 40px;
-    text-align: center;
-    cursor: pointer;
-    margin: 20px 0;
-    background-color: #f8f9fa;
+﻿.dropzone{
+    border: 2px dashed #0026ff;
+    padding: 30px; 
+    cursor: pointer; 
 }
-
-    .dropzone:hover {
-        background-color: #e9ecef;
-        border-color: #007bff;
-    }
-
-    .dropzone p {
-        margin: 0;
-        color: #6c757d;
-    }

@@ -74,11 +74,11 @@
             //Inhalt wird gelesen und geprüft
             List<FoA_DA> list = await ReadFile(uploadedFile);
 
-            if(list.Count == 0)
+            if (list.Count == 0)
             {
                 comment = "Keine Daten in der Excel-Datei gefunden";
                 StateHasChanged();
-                return; 
+                return;
             }
             // Datei hat Inhalt und kann in DB gespeichert werden
             bool isWorking = FoA_DA.SaveDAtoDb(list);
@@ -90,7 +90,7 @@
             errorMessage = $"Fehler: {ex.Message}";
             comment = "Einlesen fehlgeschlagen";
             StateHasChanged();
-        } 
+        }
         isProcessing = false;
         StateHasChanged();
     }
@@ -104,7 +104,7 @@
             using Stream? stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); //max size = 10MB (damit Benutzer ned zu große Datein hochladen können)
             using MemoryStream memorystream = new MemoryStream();
             await stream.CopyToAsync(memorystream);
-            memorystream.Position = 0; 
+            memorystream.Position = 0;
             using IXLWorkbook workbook = new XLWorkbook(memorystream); //workbook == excel object
             IXLWorksheet sheet = workbook.Worksheets.First();
 
@@ -130,7 +130,7 @@
             comment = "Inhalt fehlerhaft";
             StateHasChanged();
         }
-        
+
         return result;
     }
 }

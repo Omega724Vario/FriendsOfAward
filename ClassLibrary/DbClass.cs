@@ -7,7 +7,7 @@ using ZstdSharp.Unsafe;
 
 public class FoA_DA
 {
-    public int ID { get; set;  } //in als NULL übergeben, Auto_Increment via sql
+    public int ID { get; set; } //in als NULL übergeben, Auto_Increment via sql
     public string Abteilung { get; set; }
     public string Titel { get; set; }
     public string Schueler { get; set; }
@@ -24,6 +24,11 @@ public class FoA_DA
     {
         try
         {
+            DbWrapper.Wrapper.RunNonQuery($"SET FOREIGN_KEY_CHECKS = 0;" +
+                $"TRUNCATE TABLE foa_da;" +
+                $"TRUNCATE TABLE foa_qrcodes;" +
+                $"TRUNCATE TABLE foa_voting_system;" +
+                $"SET FOREIGN_KEY_CHECKS = 1;");
             CreateClassesSQL();
             foreach (FoA_DA da in foaDA)
             {
@@ -56,7 +61,7 @@ public class FoA_DA
                     "TRUNCATE TABLE foa_da;TRUNCATE TABLE foa_qrcodes;" +
                     "TRUNCATE TABLE foa_voting_system;" +
                     "SET FOREIGN_KEY_CHECKS = 1;");
-                foreach(FoA_QrCodes qrCode in qrCodes)
+                foreach (FoA_QrCodes qrCode in qrCodes)
                 {
                     DbWrapper.Wrapper.RunNonQuery($"INSERT INTO FoA_QrCodes (QrID) VALUES ('{qrCode.QrId}')");
                 }
@@ -97,7 +102,7 @@ public class FoA_DA
             DbWrapper.Wrapper.RunNonQuery(
                 "CREATE TABLE IF NOT EXISTS FoA_QrCodes (" +
                 "QrID VARCHAR(8) NOT NULL, " +
-                "PRIMARY KEY(QrID))");  
+                "PRIMARY KEY(QrID))");
 
             DbWrapper.Wrapper.RunNonQuery(
                 "CREATE TABLE IF NOT EXISTS FoA_Voting_System (" +
@@ -118,7 +123,7 @@ public class FoA_DA
         }
     }
 
-    static List<string> UnUsedQrCodes ()
+    static List<string> UnUsedQrCodes()
     {
         List<string> qrIds = new List<string>();
 
@@ -128,6 +133,6 @@ public class FoA_DA
         {
             qrIds.Add(row["QrId"].ToString());
         }
-        return qrIds; 
+        return qrIds;
     }
 }
