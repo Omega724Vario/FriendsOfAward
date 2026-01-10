@@ -1,36 +1,162 @@
 ﻿@page "/Diplomarbeiten"
+@using ClosedXML.Excel
 @rendermode InteractiveServer
 
 <PageTitle>Diplomarbeiten</PageTitle>
-
-
 <h3>Diplomarbeiten</h3>
-<form>
-    Diplomarbeiten einlesen:
-    <button type="button" @onclick="Btn_DAEinlesen">
-        Inkrementiere!
-    </button>
 
+
+<form>
+<div class="dropzone">
+    <p>Dateien hier ablegen oder klicken</p>
+    <InputFile OnChange="SelectedFile"
+               accept=".xlsx"
+               multiple="false" /> <!--eventuell true? Nachsehen wie es funktioniert-->
+               <!--Update: nicht nötig, immer nur eine eingegeben-->
+</div>
+
+<button type="button" @onclick="Btn_DAEinlesen">Diplomarbeiten einlesen</button>
+
+<p>@comment</p>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+@if (isProcessing)
+{
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+}
+<!--Eingescannte Datensätze anzeigen-->
+<table>
+    @if (result.Count != 0)
+    {
+        <tr>
+            <th>Nr</th>
+            <th>Abteilung</th>
+            <th>Titel</th>
+            <th>Schüler</th>
+        </tr>
+
+        @foreach (FoA_DA da in result)
+        {
+            <tr>
+                <td> @da.ID </td>
+                <td> @da.Abteilung </td>
+                <td> @da.Titel </td>
+                <td> @da.Schueler </td>
+            </tr>
+        }
+    }    
+</table>
 </form>
 
-
 @code {
-    string comment = ""; 
-    string path = "../../Diplomarbeiten"; 
+    private IBrowserFile? uploadedFile;
+    private string comment = "";
+    private string errorMessage = "";
+    private bool isProcessing = false;
+    List<FoA_DA> result = new List<FoA_DA>();
 
+
+    // Datei wird in variable gespeichert
+    async Task SelectedFile(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            uploadedFile = e.File;
+            comment = $"Excel-Datei geladen: {uploadedFile.Name}";
+            errorMessage = "";
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fehler beim Laden der Datei: {ex.Message}";
+            StateHasChanged();
+        }
+    }
 
     /*
     Ein Admin kann eine Excel-Datei in die Datenbank laden, mit den Spalten:
-        Nr|AbteilungKürzel|Titel|Autor:innen
-        Das ist dann die aktuelle Liste der Diplomarbeiten zur Auswahl. 
-        Beim Laden wird der aktuelle Inhalt in der DB vollständig ersetzt.
-    */
-private void Btn_DAEinlesen(string path)
+    Nr|AbteilungKürzel|Titel|Autor:innen
+    Das ist dann die aktuelle Liste der Diplomarbeiten zur Auswahl.
+    Beim Laden wird der aktuelle Inhalt in der DB vollständig ersetzt.
+*/
+    async Task Btn_DAEinlesen()
     {
-        List<FoA_DA> elementsDA = new List<FoA_DA>();
-        elementsDA.Add(new FoA_DA(0, "Wii", "ho", "HalloSwen"));
-        bool isWorking = FoA_DA.SaveDAtoDb(elementsDA);
-        if (isWorking == false) comment = "The upload to the database didn't work"; //enum Fehlercodes?
-        else comment = "upload complete";
+        if (uploadedFile == null)
+        {
+            comment = "Keine Excel-Datei ausgewählt";
+            StateHasChanged();
+            return;
+        }
+        // Excel Datei wurde ausgewählt
+        isProcessing = true;
+        errorMessage = "";
+        StateHasChanged();
+        try
+        {
+            //Inhalt wird gelesen und geprüft
+            List<FoA_DA> list = await ReadFile(uploadedFile);
+
+            if(list.Count == 0)
+            {
+                comment = "Keine Daten in der Excel-Datei gefunden";
+                StateHasChanged();
+                return; 
+            }
+            // Datei hat Inhalt und kann in DB gespeichert werden
+            bool isWorking = FoA_DA.SaveDAtoDb(list);
+            comment = isWorking ? "Upload erfolgreich" : "Fehler beim Speichern";
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fehler: {ex.Message}";
+            comment = "Einlesen fehlgeschlagen";
+            StateHasChanged();
+        } 
+        isProcessing = false;
+        StateHasChanged();
+    }
+
+    async Task<List<FoA_DA>> ReadFile(IBrowserFile file)
+    {
+        try
+        {
+            using Stream? stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); //max size = 10MB (damit Benutzer ned zu große Datein hochladen können)
+            using MemoryStream memorystream = new MemoryStream();
+            await stream.CopyToAsync(memorystream);
+            memorystream.Position = 0; 
+            using IXLWorkbook workbook = new XLWorkbook(memorystream); //workbook == excel object
+            IXLWorksheet sheet = workbook.Worksheets.First();
+
+            var rows = sheet.RangeUsed().RowsUsed().Skip(1); //alle verwendeten Zeilen/Spalten (erste mit Überschrift wird geskipped)
+
+            foreach (var row in rows)
+            {
+                if (!string.IsNullOrEmpty(row.Cell(1).GetString()) &&
+                !string.IsNullOrEmpty(row.Cell(2).GetString()))
+                {
+                    result.Add(new FoA_DA(
+                        row.Cell(1).GetValue<int>(),
+                        row.Cell(2).GetString(),
+                        row.Cell(3).GetString(),
+                        row.Cell(4).GetString()
+                    ));
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Fehler: {ex.Message}";
+            comment = "Inhalt fehlerhaft";
+            StateHasChanged();
+        }
+        
+        return result;
     }
 }

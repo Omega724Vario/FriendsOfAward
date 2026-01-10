@@ -1,10 +1,24 @@
 ﻿@page "/Ergebnisse"
+@using static FoA_DA
 
 <PageTitle>Ergebnisse</PageTitle>
 
 
 <h3>Ergebnisse</h3>
 
-@code {
+<form>
+    <table>
+        <tr>
+            <th>Nr</th>
+            <th>Abteilung</th>
+            <th>Titel</th>
+            <th>Schüler</th>
+            <th></th>
+        </tr>
+    </table>
+</form>
 
+@code {
+    List<FoA_Voting_System> voting = new(); 
+    //Ergebnisse vom Voting speichern 
 }
