@@ -19,8 +19,15 @@ namespace FriendsOfAward
 
         public void Login(string username)
         {
-            ClaimsIdentity identity = new([new Claim(ClaimTypes.Name, username)],
-                    "MyCustomAuthType");  // von SPAA erfunden, keiner der Standardtypen
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Name, username),
+        new Claim(ClaimTypes.Role, "Admin") // 🔥 DAS FEHLT
+    };
+
+            ClaimsIdentity identity = new(
+                claims,
+                "MyCustomAuthType");
 
             _currentUser = new ClaimsPrincipal(identity);
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());

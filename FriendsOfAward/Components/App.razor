@@ -14,7 +14,18 @@
 </head>
 
 <body>
-    <Routes />
+
+    <CascadingAuthenticationState>
+        <Routes>
+            <AuthorizeRouteView Roles="Admin">
+                <NotAuthorized>
+                    <h3>Kein Zugriff</h3>
+                    <p>Diese Anwendung ist nur für Administratoren.</p>
+                </NotAuthorized>
+            </AuthorizeRouteView>
+        </Routes>
+    </CascadingAuthenticationState>
+
     <script src="_framework/blazor.web.js"></script>
     <!-- Dein Download-Script -->
     <script src="download.js"></script>
