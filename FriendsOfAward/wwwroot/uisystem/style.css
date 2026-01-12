@@ -1,0 +1,90 @@
+﻿/*BUTTON*/
+.ui-btn {
+    outline: 0;
+    border: 0;
+    border-radius: var(--radius);
+    padding: 0.5rem 0.75rem;
+    font-family: "Geist", sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition-duration: 0.2s;
+    background: var(--secondary);
+    color: var(--secondary-foreground);
+}
+
+    .ui-btn:hover {
+        opacity: 80%;
+        /*transform: scale(1.02);*/
+    }
+
+    .ui-btn.primary {
+        background: var(--primary);
+        color: var(--primary-foreground);
+    }
+
+    .ui-btn.svg-icon {
+        width: 2.05rem;
+        height: 2.05rem;
+        padding: 0.5rem;
+        border-radius: 1.025rem;
+    }
+
+    .ui-btn.svg-icon > svg {
+        width: 100%;
+        height: 100%;
+        margin: auto;
+        fill: var(--foreground);
+    }
+
+        .ui-btn.primary.svg-icon > svg {
+            fill: var(--primary-foreground);
+        }
+
+/*INPUT*/
+.ui-input {
+    outline: 0;
+    padding: 0.5rem 0.75rem;
+    font-family: "Geist", sans-serif;
+    font-weight: 500;
+    border: 1px solid var(--input);
+    border-radius: var(--radius);
+    outline: 1px solid transparent;
+    box-shadow: var(--shadow);
+    transition-duration: 0.1s;
+}
+
+    .ui-input:focus-visible {
+        outline: 1px solid var(--ring);
+    }
+
+/*SPINNER*/
+@keyframes spin {
+    0% {
+        transform: rotate(0);
+    }
+
+    50% {
+        transform: rotateX(360);
+    }
+
+    100% {
+        transform: rotate(0);
+    }
+}
+
+.ui-spinner {
+    width: 2rem;
+    height: 2rem;
+}
+
+    .ui-spinner > svg {
+        height: 100%;
+        width: 100%;
+        fill: var(--foreground);
+        animation: spin 1s linear normal infinite;
+    }
+
+    .ui-spinner.primary > svg {
+        fill: var(--primary);
+    }
+
