@@ -39,6 +39,11 @@
     flex: 1;
 }
 
+/*ICON*/
+.icon {
+    fill: var(--foreground);
+}
+
 /*BUTTON*/
 .ui-btn {
     width: fit-content;
