@@ -1,4 +1,45 @@
-﻿/*BUTTON*/
+﻿/*TODO: change all px values to rem, everywhere*/
+
+/*HELPER CLASSES*/
+.m {
+    margin: 5px;
+}
+
+.mr {
+    margin-right: 5px;
+}
+
+.ml {
+    margin-left: 5px;
+}
+
+.mt {
+    margin-top: 5px;
+}
+
+.mb {
+    margin-bottom: 5px;
+}
+
+.content-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.center {
+    margin: auto;
+}
+
+.shadow {
+    box-shadow: var(--shadow);
+}
+
+.spacer {
+    flex: 1;
+}
+
+/*BUTTON*/
 .ui-btn {
     width: fit-content;
     outline: 0;
@@ -23,6 +64,11 @@
         color: var(--primary-foreground);
     }
 
+    .ui-btn.destructive {
+        background: var(--destructive);
+        color: var(--destructive-foreground);
+    }
+
     .ui-btn.svg-icon {
         width: 2.05rem;
         height: 2.05rem;
@@ -39,6 +85,10 @@
 
         .ui-btn.primary.svg-icon > svg {
             fill: var(--primary-foreground);
+        }
+
+        .ui-btn.destructive.svg-icon > svg {
+            fill: var(--destructive-foreground);
         }
 
 /*INPUT*/
@@ -87,10 +137,25 @@
 
 /*TYPOGRAPHY*/
 h1 {
-    margin: 0;
+    margin: 10px 0 10px 0;
 }
+
 h2 {
-    margin: 0;
+    margin: 10px 0 10px 0;
+}
+
+h2.underlined::after {
+    content: "";
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: var(--primary);
+    margin-top: 8px;
+    border-radius: 2px;
+}
+
+h3 {
+    font-weight: 500;
 }
 
 /*FILE DROP AREA*/
@@ -126,6 +191,7 @@ h2 {
     height: 50px;
     background: var(--primary);
     color: var(--primary-foreground);
+    border-radius: var(--radius);
     display: grid;
     text-align: center;
     align-items: center;
@@ -133,26 +199,57 @@ h2 {
 
 /*SIDEBAR*/
 .ui-btn-sidebar {
-    width: 100%;
     outline: 0;
     border: 0;
     border-radius: var(--radius);
     padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
     font-family: "Geist", sans-serif;
-    font-weight: 500;
+    font-weight: 300;
+    font-size: 0.93em;
     cursor: pointer;
     transition-duration: 0.2s;
     background: transparent;
-    color: var(--secondary-foreground);
+    color: var(--sidebar-foreground);
     text-align: left;
+    text-decoration: none;
 }
 
     .ui-btn-sidebar:hover {
-        background: var(--secondary);
-        color: var(--secondary-foreground);
+        background: var(--sidebar-accent);
+        color: var(--sidebar-accent-foreground);
     }
 
-    .ui-btn-sidebar:active {
-        background: var(--primary);
-        color: var(--primary-foreground);
+    .ui-btn-sidebar.active {
+        background: var(--sidebar-primary);
+        color: var(--sidebar-primary-foreground);
     }
+
+    .ui-btn-sidebar > svg {
+        width: 1.2rem;
+        height: 1.2rem;
+        fill: var(--sidebar-foreground);
+    }
+
+    .ui-btn-sidebar:hover > svg {
+        fill: var(--sidebar-accent-foreground);
+    }
+
+    .ui-btn-sidebar.active > svg {
+        fill: var(--sidebar-primary-foreground);
+    }
+
+/*CARD*/
+.ui-card {
+/*    width: fit-content;
+    height: fit-content;*/
+    display: flex;
+    flex-direction: column;
+    padding: 0.6rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+    box-shadow: var(--shadow);
+}

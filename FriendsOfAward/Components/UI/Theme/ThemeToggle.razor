@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @inject IJSRuntime JS
 @inject ProtectedLocalStorage LocalStorage
+@rendermode InteractiveServer
 
 <button class="ui-btn svg-icon primary" @onclick="ToggleTheme">
     @if (theme == "dark")

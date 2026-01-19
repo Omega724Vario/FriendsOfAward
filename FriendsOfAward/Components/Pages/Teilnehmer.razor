@@ -10,25 +10,34 @@
 <PageTitle>Teilnehmer</PageTitle>
 
 
-<h2 class="headline-bg">Teilnehmer</h2>
+<div class="ui-header">
+    <h2>UI System</h2>
+</div>
 
-<h1 class="subheadline">QR-Codes:</h1>
+<h2 class="underlined">QR-Codes:</h2>
 
-<div>
+<div class="input-container">
+    <label for="qrCode_Number">Anzahl:</label>
+    <input class="ui-input" id="qrCode_Number" type="number" @bind="qrCode_Number" min="1" max="999" />
+    <span class="@(string.IsNullOrEmpty(errorMessage) ? "" : "errorMessage")">@errorMessage</span>
 
-<label for="qrCode_Number" class="big-label"> Anzahl:  </label>
-<input type="number"  id="qrCode_Number" @bind="qrCode_Number" />
-<span class="@(string.IsNullOrEmpty(errorMessage) ? "" : "errorMessage")">@errorMessage</span>
-<br/>
-<button type="button" class="btn_generateQRCode" @onclick="Btn_QRCodesGenerieren">QR-Codes erstellen</button>
+    <div>
+        <button class="ui-btn primary mr" type="button" @onclick="Btn_QRCodesGenerieren">QR-Codes erstellen</button>
 
-    @if (qrCodeList.Count > 0)
-    {
-        <button class="btn_generateQRCode" @onclick="DownloadHtml">
-            QR-Codes herunterladen
-        </button>
-    }
+        @if (qrCodeList.Count > 0)
+        {
+            <button class="ui-btn btn_generateQRCode" @onclick="DownloadHtml">
+                QR-Codes herunterladen
+            </button>
+        }
 
+        @if (isLoading == true)
+        {
+            <div class="ui-spinner primary mt">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M232,128a104,104,0,0,1-208,0c0-41,23.81-78.36,60.66-95.27a8,8,0,0,1,6.68,14.54C60.15,61.59,40,93.27,40,128a88,88,0,0,0,176,0c0-34.73-20.15-66.41-51.34-80.73a8,8,0,0,1,6.68-14.54C208.19,49.64,232,87,232,128Z"></path></svg>
+            </div>
+        }
+    </div>
 </div>
 
     <h3>Erzeugte QR-Codes:</h3>
@@ -46,11 +55,12 @@
 
 @code {
     private string btnClick = "";
-    private int qrCode_Number;
+    private int qrCode_Number = 1;
     private string errorMessage;
     private List<dynamic> qrCodeList = new();
     private List<string> passwordList = new();
     private string? QrPngBase64;
+    private bool isLoading = false;
 
 
 
@@ -61,11 +71,16 @@
 
     private void Btn_QRCodesGenerieren()
     {
+        isLoading = true;
+        StateHasChanged();
         string password = "";
         errorMessage = "";
-        if (!(qrCode_Number >= 1))
+        if (qrCode_Number < 1 || qrCode_Number > 999)
         {
             errorMessage = "Bitte gültige Anzahl eingeben (1-999)";
+            // isLoading = false;
+            // StateHasChanged();
+            return;
         }
         qrCodeList.Clear();
         passwordList.Clear();
@@ -95,6 +110,8 @@
                 }
             }
         }
+        // isLoading = false;
+        // StateHasChanged();
     }
 
     private async Task DownloadHtml()

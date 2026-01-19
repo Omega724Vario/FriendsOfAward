@@ -1,69 +1,6 @@
-﻿.headline-bg {
-    font-size: 2.5rem;
-    font-weight: 700;
-    text-align: center;
-    color: white; /* Textfarbe */
-    padding: 15px 25px; /* Innenabstand */
-    margin: 0px 0;
-    border-radius: 8px; /* abgerundete Ecken */
-    /* Hintergrundfarbe oder Verlauf */
-    background: linear-gradient(135deg, #1abc9c, #134883);
-    /* Optional: Schatten für Tiefe */
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-
-.btn_generateQRCode {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #1abc9c, #00bcd4);
-    color: white;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.3s ease;
-}
-
-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 188, 212, 0.4);
-}
-
-button:active {
-    transform: scale(0.97);
-    box-shadow: 0 3px 6px rgba(0, 188, 212, 0.3);
-}
-
-input[type="number"] {
-    width: 120px; /* kompakter als Textfelder */
-    padding: 10px 12px;
-    margin: 8px 0;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    font-size: 1rem;
-    text-align: center; /* Zahl mittig */
-    transition: all 0.3s ease;
-}
-
-    input[type="number"]:focus {
-        border-color: #2196f3; /* Blau beim Fokus */
-        background-color: #fff;
-        outline: none;
-        box-shadow: 0 0 8px rgba(33, 150, 243, 0.3);
-    }
-
-    /* Entfernt die Standard-Pfeile im Chrome/Edge */
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-/* Entfernt die Pfeile in Firefox */
-input[type="number"] {
-    -moz-appearance: textfield;
+﻿.input-container {
+    display: grid;
+    gap: 5px;
 }
 
 /* Basis-Label */
@@ -74,39 +11,6 @@ input[type="number"] {
     color: #333;
     transition: color 0.3s ease;
 }
-
-/* Größeres Label für große Felder */
-.big-label {
-    font-size: 1.3rem; /* größer als Standard */
-    letter-spacing: 1px; /* etwas mehr Abstand */
-    line-height: 1.4; /* bessere Lesbarkeit */
-}
-
-    /* Fokus-Effekt: Label hebt sich hervor */
-    input:focus + .form-label,
-    .big-label:focus {
-        color: #00bcd4; /* Türkis passend zu deinem Design */
-    }
-
-
-
-.subheadline {
-    font-size: 1.6rem;
-    font-weight: 600;
-    margin: 30px 0 15px;
-    position: relative;
-    color: #333;
-}
-
-    .subheadline::after {
-        content: "";
-        display: block;
-        width: 60px;
-        height: 3px;
-        background: linear-gradient(135deg, #2196f3, #00bcd4, #4caf50);
-        margin-top: 8px;
-        border-radius: 2px;
-    }
 
 .errorMessage {
         color: #d32f2f; /* kräftiges Rot */
