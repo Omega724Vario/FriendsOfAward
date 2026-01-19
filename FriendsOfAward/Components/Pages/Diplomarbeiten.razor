@@ -3,55 +3,57 @@
 @rendermode InteractiveServer
 
 <PageTitle>Diplomarbeiten</PageTitle>
-<h3>Diplomarbeiten</h3>
-
 
 <form>
-<div class="dropzone">
-    <p>Dateien hier ablegen oder klicken</p>
-    <InputFile OnChange="SelectedFile"
-               accept=".xlsx"
-               multiple="false" /> <!--eventuell true? Nachsehen wie es funktioniert-->
-               <!--Update: nicht nötig, immer nur eine eingegeben-->
-</div>
+    <label class="ui-drop-area shadow">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M213.66,82.34l-56-56A8,8,0,0,0,152,24H56A16,16,0,0,0,40,40V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V88A8,8,0,0,0,213.66,82.34ZM152,88V44l44,44Z"></path></svg>
+        Dateien hier ablegen oder klicken
+        <InputFile OnChange="SelectedFile"
+                   class="ui-drop-input"
+                   accept=".xlsx"
+                   multiple="false" />
+    </label>
 
-<button type="button" @onclick="Btn_DAEinlesen">Diplomarbeiten einlesen</button>
+    <button class="ui-btn primary mt mb" type="button" @onclick="Btn_DAEinlesen">Diplomarbeiten einlesen</button>
 
-<p>@comment</p>
+    <p>@comment</p>
 
-@if (!string.IsNullOrEmpty(errorMessage))
-{
-    <div class="alert alert-danger">@errorMessage</div>
-}
-
-@if (isProcessing)
-{
-    <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-    </div>
-}
-<!--Eingescannte Datensätze anzeigen-->
-<table>
-    @if (result.Count != 0)
+    @if (!string.IsNullOrEmpty(errorMessage))
     {
-        <tr>
-            <th>Nr</th>
-            <th>Abteilung</th>
-            <th>Titel</th>
-            <th>Schüler</th>
-        </tr>
+        <div class="alert alert-danger">@errorMessage</div>
+    }
 
-        @foreach (FoA_DA da in result)
+    @if (isProcessing)
+    {
+        <div class="ui-spinner primary">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M232,128a104,104,0,0,1-208,0c0-41,23.81-78.36,60.66-95.27a8,8,0,0,1,6.68,14.54C60.15,61.59,40,93.27,40,128a88,88,0,0,0,176,0c0-34.73-20.15-66.41-51.34-80.73a8,8,0,0,1,6.68-14.54C208.19,49.64,232,87,232,128Z"></path></svg>
+        </div>
+        @* <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div> *@
+    }
+    <!--Eingescannte Datensätze anzeigen-->
+    <table>
+        @if (result.Count != 0)
         {
             <tr>
-                <td> @da.ID </td>
-                <td> @da.Abteilung </td>
-                <td> @da.Titel </td>
-                <td> @da.Schueler </td>
+                <th>Nr</th>
+                <th>Abteilung</th>
+                <th>Titel</th>
+                <th>Schüler</th>
             </tr>
-        }
-    }    
-</table>
+
+            @foreach (FoA_DA da in result)
+            {
+                <tr>
+                    <td> @da.ID </td>
+                    <td> @da.Abteilung </td>
+                    <td> @da.Titel </td>
+                    <td> @da.Schueler </td>
+                </tr>
+            }
+        }    
+    </table>
 </form>
 
 @code {
@@ -106,6 +108,7 @@
             {
                 comment = "Keine Daten in der Excel-Datei gefunden";
                 StateHasChanged();
+                isProcessing = false;
                 return; 
             }
             // Datei hat Inhalt und kann in DB gespeichert werden
@@ -117,6 +120,7 @@
         {
             errorMessage = $"Fehler: {ex.Message}";
             comment = "Einlesen fehlgeschlagen";
+            isProcessing = false;
             StateHasChanged();
         } 
         isProcessing = false;
