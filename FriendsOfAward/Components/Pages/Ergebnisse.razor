@@ -31,7 +31,8 @@
 
 @code {
     List<(FoA_DA, int count)> voting = new();
-    private string comment =""; 
+    private string comment ="";
+    private bool isWorking = false; 
 
     protected override async Task OnInitializedAsync()
     {
@@ -49,34 +50,54 @@
         }
     }
 
-    private async Task Btn_Download()
+    private bool CreateExcelFile()
     {
+        XLWorkbook? workbook = new XLWorkbook();
+
+        voting = voting
+            .OrderByDescending(v => v.count)
+            .ToList();
+
+        // Referenz: https://www.youtube.com/watch?v=3DIKSjQMc5U
         try
         {
-            using var wb = new XLWorkbook();
-            var ws = wb.AddWorksheet("Results");
-            ws.Cell("A1").InsertTable(voting);
-            ws.Columns().AdjustToContents();
+            IXLWorksheet worksheet = workbook.Worksheets.Add("FoA_Ergebnisse");
+            worksheet.Cell("A1").Value = "Nr";
+            worksheet.Cell("B1").Value = "Titel";
+            worksheet.Cell("C1").Value = "Schüler";
+            worksheet.Cell("D1").Value = "Count";
 
-            using var stream = new MemoryStream();
-            wb.SaveAs(stream);
+            int nr = 2; 
+            foreach((FoA_DA, int) v in voting)
+            {
+                worksheet.Row(nr).Cell("A").Value = v.Item1.ID;
+                worksheet.Row(nr).Cell("B").Value = v.Item1.Titel;
+                worksheet.Row(nr).Cell("C").Value = v.Item1.Schueler;
+                worksheet.Row(nr).Cell("D").Value = v.Item2;
+                nr++; 
+            }
 
-            var content = stream.ToArray();
-            var base64 = Convert.ToBase64String(stream.ToArray());
-            var filename = $"{DateTime.UtcNow:yyyy}_Ergebnisse_FriendsofAward.xlsx";
+            IXLRange? range = worksheet.Range($"A1:D{voting.Count+1}"); 
+            IXLTable table = range.CreateTable(); 
+            table.Theme = XLTableTheme.TableStyleLight10; 
 
-            await JS.InvokeVoidAsync(
-                "downloadFile",
-                filename,
-                base64);
+            worksheet.Cell($"A{voting.Count + 1}").Value = "Total Votes: ";
+            worksheet.Cell($"D{voting.Count + 1}").FormulaA1 = $"SUM(D2:D{voting.Count + 1})"; 
 
-            comment = "Success!";
+            worksheet.Row(voting.Count + 1).Style.Font.Bold = true; 
+            string filename = $"{DateTime.Today.Year}_Ergebnisse_FriendsOfAward.xlsx"; 
+            workbook.SaveAs(filename); 
+            return true; 
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            comment =$"Something went wrong: {ex}"; 
+            return false;   
         }
     }
 
+    private void Btn_Download()
+    {
+        isWorking = CreateExcelFile(); 
+    }
 }

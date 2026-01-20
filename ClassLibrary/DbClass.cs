@@ -85,6 +85,13 @@ public class FoA_DA
             DaId = daId;
         }
     }
+
+    // Methode, speichert angaben von Benutzer
+    // Absoluter Favourit anders speichern als andere
+    static bool SaveVotings()
+    {
+
+    }
     static bool CreateClassesSQL()
     {
         try
