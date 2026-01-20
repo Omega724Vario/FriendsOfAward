@@ -1,7 +1,6 @@
 ﻿@using FriendsOfAward.Components.UI.Theme
+@using FriendsOfAward.Components.Auth;
 @inherits LayoutComponentBase
-@* @rendermode InteractiveServer *@
-@* @inject IJSRuntime JS *@
 
 <div class="app-container">
     <nav class="sidebar">
@@ -32,7 +31,9 @@
         <div class="ui-card mt">Admin: Max Mustermann</div>
     </nav>
     <div class="content">
-        @Body
+        <AuthView>
+            @Body
+        </AuthView>
     </div>
 </div>
 

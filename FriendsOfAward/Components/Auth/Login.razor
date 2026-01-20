@@ -1,0 +1,37 @@
+﻿@page "/Login"
+@rendermode InteractiveServer
+@inject CustomAuthStateProvider MyAuthProvider
+@inject NavigationManager MyNavMgr
+
+<PageTitle>Login</PageTitle>
+
+<h1>Login</h1>
+<input @bind="username" placeholder="Benutzername" />
+<input @bind="password" placeholder="Passwort" type="password" />
+<button @onclick="HandleLogin">Login</button>
+<p style="color: red">@message</p>
+
+@code {
+	string username = "";
+	string password = "";
+	string message = "";
+
+	void HandleLogin()
+	{
+		if (IsValidUser(username, password))
+		{
+			MyAuthProvider.Login(username);
+			MyNavMgr.NavigateTo("/");
+		}
+		else
+		{
+			message = "Login fehlgeschlagen.";
+		}
+	}
+
+	bool IsValidUser(string username, string password)
+	{
+		// TODO: Hier echte Validierung gegen eine Datenbank oder einen anderen Dienst durchführen
+		return true;
+	}
+}
