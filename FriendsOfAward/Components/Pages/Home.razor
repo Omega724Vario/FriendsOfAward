@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using FriendsOfAward.Components.Layout
+@using FriendsOfAward.Components.UI.Components;
 @layout UserLayout
 @rendermode InteractiveServer
 
@@ -47,14 +48,19 @@
                     5 von 5 Favoriten ausgewählt.
                 </div>
             }
-		<button id="submit-btn">Bewertung absenden</button>
+		<button id="submit-btn" @onclick="Btn_Submit">Bewertung absenden</button>
 	</main>
 </div>
+
+<Modal @ref="modal">
+    <p>Some text in the Modal..</p>
+</Modal>
 
 @code {
     List<Dip> dips = [];
     bool selectFavs = true;
     bool favError = false;
+    private Modal modal;
 
     protected override void OnInitialized()
     {
@@ -118,6 +124,21 @@
         return dips.FindAll(d => d.State == "topfavorite").Count;
     }
 
+    private async Task Btn_Submit()
+    {
+        modal.Open();
+
+
+        List<Dip> favoriteList = dips.FindAll(d => d.State == "favorite");
+        List<Dip> topfavorite = dips.FindAll(d => d.State == "topfavorite");
+
+
+        //string conformationDialog;
+
+        
+
+    }
+
     class Dip
     {
         public string Name { get; }
@@ -129,4 +150,5 @@
             State = "";
         }
     }
+
 }
