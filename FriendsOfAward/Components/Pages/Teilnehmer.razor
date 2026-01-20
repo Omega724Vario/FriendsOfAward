@@ -37,8 +37,7 @@
 
 @if (!isLoading)
 {
-    <h3>Erzeugte QR-Codes:</h3>
-    <div style="display:flex; flex-wrap:wrap; gap:20px;">
+    <div style="display:flex; flex-wrap: wrap; gap:12px; margin-top: 12px;">
         @for (int i = 0; i < qrCodeList.Count; i++)
         {
             <div style="text-align:center;" class="ui-card">
@@ -48,7 +47,6 @@
         }
     </div>
 }
-
 
 @code {
     private string btnClick = "";
