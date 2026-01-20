@@ -1,24 +1,82 @@
 ﻿@page "/Ergebnisse"
+@rendermode InteractiveServer
 @using static FoA_DA
+@using ClosedXML.Excel
+@using System.Data;
 
 <PageTitle>Ergebnisse</PageTitle>
-
-
 <h3>Ergebnisse</h3>
 
 <form>
     <table>
         <tr>
             <th>Nr</th>
-            <th>Abteilung</th>
             <th>Titel</th>
             <th>Schüler</th>
-            <th></th>
+            <th>Count</th>
         </tr>
+            @foreach((FoA_DA, int count) da in voting)
+            {
+                <tr>
+                    <th>@da.Item1.ID</th>
+                    <th>@da.Item1.Titel</th>
+                    <th>@da.Item1.Schueler</th>
+                    <th>@da.Item2</th>
+                </tr>
+            }
     </table>
+    <button type="button" @onclick="Btn_Download">Aktuelle Ergebnisse herunterladen</button>
+    @comment
 </form>
 
 @code {
-    List<FoA_Voting_System> voting = new(); 
-    //Ergebnisse vom Voting speichern 
+    List<(FoA_DA, int count)> voting = new();
+    private string comment =""; 
+
+    protected override async Task OnInitializedAsync()
+    {
+        //Ergebnisse vom Voting speichern
+
+        //ID | Titel | Schueler | Count
+        DataTable da = DbWrapper.Wrapper.RunQuery("SELECT d.DaId, d.Titel, d.Schueler, COUNT(v.DaId) AS vote_count FROM foa_da AS d INNER JOIN foa_voting_system AS v ON d.DaId = v.DaId GROUP BY d.DaId, d.Titel, d.Schueler;");
+        FoA_DA result;
+        //Schleife für jede DA in Db, pro durchgang wird
+        foreach (DataRow row in da.Rows)
+        {
+            result = new FoA_DA((int)row[0], (string)row[1], (string)row[2]);
+            int count = Convert.ToInt32(row[3]);
+            voting.Add((result, count));
+        }
+    }
+
+    private async Task Btn_Download()
+    {
+        try
+        {
+            using var wb = new XLWorkbook();
+            var ws = wb.AddWorksheet("Results");
+            ws.Cell("A1").InsertTable(voting);
+            ws.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            wb.SaveAs(stream);
+
+            var content = stream.ToArray();
+            var base64 = Convert.ToBase64String(stream.ToArray());
+            var filename = $"{DateTime.UtcNow:yyyy}_Ergebnisse_FriendsofAward.xlsx";
+
+            await JS.InvokeVoidAsync(
+                "downloadFile",
+                filename,
+                base64);
+
+            comment = "Success!";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            comment =$"Something went wrong: {ex}"; 
+        }
+    }
+
 }

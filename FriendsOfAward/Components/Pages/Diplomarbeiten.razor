@@ -36,7 +36,6 @@
     {
         <tr>
             <th>Nr</th>
-            <th>Abteilung</th>
             <th>Titel</th>
             <th>Schüler</th>
         </tr>
@@ -45,7 +44,6 @@
         {
             <tr>
                 <td> @da.ID </td>
-                <td> @da.Abteilung </td>
                 <td> @da.Titel </td>
                 <td> @da.Schueler </td>
             </tr>
@@ -81,7 +79,7 @@
 
     /*
     Ein Admin kann eine Excel-Datei in die Datenbank laden, mit den Spalten:
-    Nr|AbteilungKürzel|Titel|Autor:innen
+    Nr|Titel|Autor:innen
     Das ist dann die aktuelle Liste der Diplomarbeiten zur Auswahl.
     Beim Laden wird der aktuelle Inhalt in der DB vollständig ersetzt.
 */
@@ -143,7 +141,6 @@
                 {
                     result.Add(new FoA_DA(
                         row.Cell(1).GetValue<int>(),
-                        row.Cell(2).GetString(),
                         row.Cell(3).GetString(),
                         row.Cell(4).GetString()
                     ));

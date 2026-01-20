@@ -7,15 +7,13 @@ using ZstdSharp.Unsafe;
 
 public class FoA_DA
 {
-    public int ID { get; } //in als NULL übergeben, Auto_Increment via sql
-    public string Abteilung { get; set; }
+    public int ID { get; set; } //in als NULL übergeben, Auto_Increment via sql
     public string Titel { get; set; }
     public string Schueler { get; set; }
 
-    public FoA_DA(int id, string abteilung, string titel, string schueler)
+    public FoA_DA(int id, string titel, string schueler)
     {
         ID = id;
-        Abteilung = abteilung;
         Titel = titel;
         Schueler = schueler;
     }
@@ -32,7 +30,7 @@ public class FoA_DA
             CreateClassesSQL();
             foreach (FoA_DA da in foaDA)
             {
-                string sql = $"INSERT INTO FoA_DA(Abteilung, Titel, Schueler) VALUES('{da.Abteilung}', '{da.Titel}', '{da.Schueler}')";
+                string sql = $"INSERT INTO FoA_DA(Titel, Schueler) VALUES('{da.Titel}', '{da.Schueler}')";
                 DbWrapper.Wrapper.RunNonQuery(sql);
             }
             return true;
@@ -94,7 +92,6 @@ public class FoA_DA
             DbWrapper.Wrapper.RunNonQuery(
                 "CREATE TABLE IF NOT EXISTS FoA_DA (" +
                 "DaId INT NOT NULL AUTO_INCREMENT, " +
-                "Abteilung VARCHAR(3) NOT NULL, " +  
                 "Titel VARCHAR(100) NOT NULL, " +
                 "Schueler VARCHAR(200) NOT NULL, " +
                 "PRIMARY KEY (DaId))");
