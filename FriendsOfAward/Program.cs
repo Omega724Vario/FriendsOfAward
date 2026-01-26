@@ -1,5 +1,7 @@
+using FriendsOfAward;
 using FriendsOfAward.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +14,7 @@ builder.Services.AddRazorComponents()
 // Authorization
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<ProtectedLocalStorage>();
 builder.Services.AddScoped<CustomAuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
   provider.GetRequiredService<CustomAuthStateProvider>());

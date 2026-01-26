@@ -41,11 +41,11 @@
 		}
 	}
 
-	void HandleLogin()
+	async Task HandleLogin()
 	{
 		if (IsValidUser(username, password))
 		{
-			MyAuthProvider.Login(username);
+			await MyAuthProvider.Login(username);
 
 			MyNavMgr.NavigateTo(returnUrl);
 		}
