@@ -1,27 +1,53 @@
 ﻿@page "/Login"
+@using FriendsOfAward.Components.Layout
+@using Microsoft.AspNetCore.WebUtilities
 @rendermode InteractiveServer
 @inject CustomAuthStateProvider MyAuthProvider
 @inject NavigationManager MyNavMgr
+@layout UserLayout
 
 <PageTitle>Login</PageTitle>
 
-<h1>Login</h1>
-<input @bind="username" placeholder="Benutzername" />
-<input @bind="password" placeholder="Passwort" type="password" />
-<button @onclick="HandleLogin">Login</button>
-<p style="color: red">@message</p>
+<div class="content-center wrapper">
+	<form class="ui-card" @onsubmit="HandleLogin">
+		<h1>Login</h1>
+		<input class="ui-input" name="username" @bind="username" placeholder="Benutzername" />
+		<input class="ui-input" name="password" @bind="password" placeholder="Passwort" type="password" />
+		<button class="ui-btn primary" type="submit">Login</button>
+		<p style="color: red">@message</p>
+	</form>
+</div>
 
 @code {
 	string username = "";
 	string password = "";
 	string message = "";
+	string returnUrl = "/Teilnehmer";
+
+	protected override void OnInitialized()
+	{
+		var uri = new Uri(MyNavMgr.Uri);
+		var query = QueryHelpers.ParseQuery(uri.Query);
+		if (query.TryGetValue("returnUrl", out var rv))
+		{
+			try
+			{
+				returnUrl = Uri.UnescapeDataString(rv);
+			}
+			catch
+			{
+				returnUrl = rv;
+			}
+		}
+	}
 
 	void HandleLogin()
 	{
 		if (IsValidUser(username, password))
 		{
 			MyAuthProvider.Login(username);
-			MyNavMgr.NavigateTo("/");
+
+			MyNavMgr.NavigateTo(returnUrl);
 		}
 		else
 		{
@@ -32,6 +58,10 @@
 	bool IsValidUser(string username, string password)
 	{
 		// TODO: Hier echte Validierung gegen eine Datenbank oder einen anderen Dienst durchführen
-		return true;
+		if (username == "admin" && password == "admin")
+		{
+			return true;
+		}
+		return false;
 	}
 }

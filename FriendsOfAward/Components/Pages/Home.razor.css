@@ -191,3 +191,20 @@
         opacity: 20%;
     }
 }
+
+/*admin login button*/
+.admin-btn {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    width: 1.6rem;
+    height: 1.6rem;
+    opacity: 80%;
+    cursor: pointer;
+}
+
+    .admin-btn > svg {
+        fill: white;
+    }

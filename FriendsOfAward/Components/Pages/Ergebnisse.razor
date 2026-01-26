@@ -1,9 +1,10 @@
 ﻿@page "/Ergebnisse"
 @using static FoA_DA
+@rendermode InteractiveServer
 
 <PageTitle>Ergebnisse</PageTitle>
 
-
+<AuthView>
 <h3>Ergebnisse</h3>
 
 <form>
@@ -17,6 +18,7 @@
         </tr>
     </table>
 </form>
+</AuthView>
 
 @code {
     List<FoA_Voting_System> voting = new(); 

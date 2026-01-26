@@ -1,0 +1,29 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager NavMgr
+@rendermode InteractiveServer
+
+<AuthorizeView>
+    <Authorized>
+        @ChildContent
+    </Authorized>
+
+    <NotAuthorized>
+        <div id="form-view">
+            <h3 style="color: red">Sie sind nicht eingeloggt.</h3>
+            <button @onclick="Btn_Login">Login</button>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    void Btn_Login()
+    {
+        var relative = NavMgr.ToBaseRelativePath(NavMgr.Uri);
+        var returnPath = string.IsNullOrEmpty(relative) ? "/" : "/" + relative;
+        var encoded = System.Uri.EscapeDataString(returnPath);
+        NavMgr.NavigateTo($"/Login?returnUrl={encoded}");
+    }
+}
