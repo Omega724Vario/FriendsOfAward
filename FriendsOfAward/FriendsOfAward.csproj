@@ -14,9 +14,7 @@
     <None Remove="Components\Pages\Teilnehmer-razor" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Components\UI\Components\Modal.razor.css" />
-  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="QRCoder" Version="1.7.0" />
