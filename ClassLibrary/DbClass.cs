@@ -137,7 +137,7 @@ public class FoA_QrCodes
     {
         QrId = qrId;
     }
-    static bool SaveQRtoDb(List<string> qrCodes)
+    public static bool SaveQRtoDb(List<string> qrCodes)
     {
         try
         {
