@@ -71,9 +71,21 @@
     protected override void OnInitialized()
     {
         base.OnInitialized();
+
+        List<(int, string)> dpls = new(); // FoA_DA.GetDAs()
+
+        if(dpls.Count != 20)
+        {
+            for (int i = 0; i < 20; i++) //nur zu Testzwecken
+            {
+                dpls.Add((i + 1, Random.Shared.Next(0, 500).ToString()));
+            }
+            //return;
+        }
+
         for (int i = 0; i < 20; i++)
         {
-            Dip dip = new("This is the name " + Random.Shared.Next(0, 100).ToString());
+            Dip dip = new(dpls[0].Item2);
             dips.Add(dip);
         }
     }
