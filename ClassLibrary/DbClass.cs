@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿using Google.Protobuf.Collections;
+using System.Data;
 
 public class FoA_DA
 {
@@ -32,6 +33,22 @@ public class FoA_DA
             Console.WriteLine($"Error in GetDAs: {ex.Message}");
         }
         return result;
+    }
+    public static bool SearchAdmin(string username)
+    {
+        string sql = $"SELECT Benutzername FROM FoA_Admin WHERE Benutzername = '{username}'";
+        DataTable dt = null; 
+        try
+        {
+            dt = DbWrapper.Wrapper.RunQuery(sql);
+            if (dt == null) return false;
+            else return true; 
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return false; 
+        }
     }
     public static bool SaveDAtoDb(List<FoA_DA> foaDA)
     {
@@ -68,6 +85,13 @@ public class FoA_DA
                 "Titel VARCHAR(100) NOT NULL, " +
                 "Schueler VARCHAR(200) NOT NULL, " +
                 "PRIMARY KEY (DaId))");
+
+            DbWrapper.Wrapper.RunNonQuery(
+                "CREATE TABLE IF NOT EXISTS FoA_Admin (" +
+                "BenutzerId INT AUTO_INCREMENT," +
+                "Benutzername VARCHAR(50) NOT NULL, UNIQUE" +
+                "Passwort VARCHAR(255) " +
+                "PRIMARY KEY(BenutzerId))");
 
             DbWrapper.Wrapper.RunNonQuery(
                 "CREATE TABLE IF NOT EXISTS FoA_QrCodes (" +
@@ -128,16 +152,7 @@ public class FoA_DA
             return (false, fehler);
         }
     }
-}
-
-public class FoA_QrCodes
-{
-    string QrId { get; set; }
-    public FoA_QrCodes(string qrId)
-    {
-        QrId = qrId;
-    }
-    static bool SaveQRtoDb(List<string> qrCodes)
+    public static bool SaveQRtoDb(List<string> qrCodes)
     {
         try
         {
@@ -155,8 +170,6 @@ public class FoA_QrCodes
         }
     }
 }
-
-
 public class FoA_Voting_System
 {
     int VotingId { get; }
