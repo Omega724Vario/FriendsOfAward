@@ -69,7 +69,7 @@
         isLoading = true;
         StateHasChanged();
         await Task.Yield();
-        
+
         string password = "";
         errorMessage = "";
         if (qrCode_Number < 1 || qrCode_Number > 999)
@@ -108,6 +108,9 @@
             }
         }
         isLoading = false;
+
+        //FoA_QrCodes.SaveQRtoDb(passwordList);
+
         StateHasChanged();
     }
 
