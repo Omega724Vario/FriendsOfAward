@@ -10,7 +10,7 @@
 <div id="blur-ball"></div>
 <div id="wrapper">
     <main id="content">
-        <span id="title">Friends of Award</span>
+        <span id="title">@title</span>
         <div id="note">
             <b>
                 Geben Sie uns Ihre persönlichen Favoriten bekannt!<br />
@@ -67,13 +67,28 @@
     bool favError = false;
     private ConfirmationModal confirmModal;
     private string modalMessage = "";
+    private string title = "Friends of Award";
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
+
+        List<(int, string)> dpls = FoA_DA.GetDAs();
+
+        if(dpls.Count != 20)
+        {
+            for (int i = 0; i < 20; i++)
+            {
+                
+                dpls.Add((i + 1, Random.Shared.Next(0, 120).ToString()));
+            }
+            title = "ERROR";
+
+        }
+
         for (int i = 0; i < 20; i++)
         {
-            Dip dip = new("This is the name " + Random.Shared.Next(0, 100).ToString());
+            Dip dip = new(dpls[i].Item2);
             dips.Add(dip);
         }
     }
