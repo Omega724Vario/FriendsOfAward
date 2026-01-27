@@ -75,11 +75,11 @@
 
         List<(int, string)> dpls = FoA_DA.GetDAs();
 
-        if(dpls.Count != 20)
+        if (dpls.Count != 20)
         {
             for (int i = 0; i < 20; i++)
             {
-                
+
                 dpls.Add((i + 1, Random.Shared.Next(0, 120).ToString()));
             }
             title = "ERROR";
@@ -88,7 +88,7 @@
 
         for (int i = 0; i < 20; i++)
         {
-            Dip dip = new(dpls[i].Item2);
+            Dip dip = new(dpls[i].Item2, dpls[i].Item1);
             dips.Add(dip);
         }
     }
@@ -170,9 +170,20 @@
         List<Dip> topfavouriteList = dips.FindAll(d => d.State == "topfavorite");
 
         //In Datenbank speichern
+        List<int> favouriteIds = new();
+
+        if (topfavouriteList.Count == 1)
+            favouriteIds.Add(topfavouriteList[0].Id);
+
+        foreach (Dip d in favouriteList)
+        {
+            favouriteIds.Add(d.Id);
+        }
+
+
 
         //qr Code und Title DPLs (erster Topfavorote)
-
+        FoA_Voting_System.SaveVote("", favouriteIds);
 
 
         return Task.CompletedTask;
@@ -186,11 +197,14 @@
     class Dip
     {
         public string Name { get; }
+        public int Id { get; set; }
         public string State { get; set; }
 
-        public Dip(string name)
+
+        public Dip(string name, int id)
         {
             Name = name;
+            Id = id;
             State = "";
         }
     }
