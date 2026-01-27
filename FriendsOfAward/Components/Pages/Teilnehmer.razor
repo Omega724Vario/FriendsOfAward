@@ -61,6 +61,7 @@
 
     protected override void OnInitialized()
     {
+        base.OnInitialized();
     }
 
 
@@ -109,7 +110,7 @@
         }
         isLoading = false;
 
-        //FoA_QrCodes.SaveQRtoDb(passwordList);
+        FoA_QrCodes.SaveQRtoDb(passwordList);
 
         StateHasChanged();
     }
