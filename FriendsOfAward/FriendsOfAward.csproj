@@ -14,6 +14,8 @@
     <None Remove="Components\Pages\Teilnehmer-razor" />
   </ItemGroup>
 
+
+
   <ItemGroup>
     <PackageReference Include="QRCoder" Version="1.7.0" />
   </ItemGroup>

@@ -1,0 +1,45 @@
+﻿@rendermode InteractiveServer
+
+@if (IsOpen)
+{
+    <div class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header warning">
+                <span class="modal-title">@Title</span>
+            </div>
+
+            <div class="modal-body">
+                @Message
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-no" @onclick="OnCancel">Nein</button>
+                <button class="btn-yes" @onclick="OnConfirm">Ja</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public string Message { get; set; }
+    [Parameter] public string Title { get; set; } = "Bist du sicher?";
+    [Parameter] public EventCallback OnYes { get; set; }
+    [Parameter] public EventCallback OnNo { get; set; }
+
+    public bool IsOpen { get; set; }
+
+    public void Open() => InvokeAsync(() => { IsOpen = true; StateHasChanged(); });
+    public void Close() => InvokeAsync(() => { IsOpen = false; StateHasChanged(); });
+
+    private async Task OnConfirm()
+    {
+        await OnYes.InvokeAsync();
+        Close();
+    }
+
+    private async Task OnCancel()
+    {
+        await OnNo.InvokeAsync();
+        Close();
+    }
+}

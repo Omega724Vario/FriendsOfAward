@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using FriendsOfAward.Components.Layout
+@using FriendsOfAward.Components.UI.Components;
 @layout UserLayout
 @rendermode InteractiveServer
 
@@ -8,25 +9,25 @@
 
 <div id="blur-ball"></div>
 <div id="wrapper">
-<main id="content">
-		<span id="title">Friends of Award</span>
-		<div id="note">
-			<b>
-				Geben Sie uns Ihre persönlichen Favoriten bekannt!<br />
-				@* Einmal klicken = Favorit (max. 5)<br />
+    <main id="content">
+        <span id="title">Friends of Award</span>
+        <div id="note">
+            <b>
+                Geben Sie uns Ihre persönlichen Favoriten bekannt!<br />
+                @* Einmal klicken = Favorit (max. 5)<br />
 				Nochmal klicken = Topfavorit (max. 1)<br /> *@
-			</b>
-			Diese Abstimmung ist anonym und auf ein Gerät beschränkt.<br />
-		</div>
-		<div id="grid">
+            </b>
+            Diese Abstimmung ist anonym und auf ein Gerät beschränkt.<br />
+        </div>
+        <div id="grid">
             @for (int i = 0; i < dips.Count; i++)
-			{
+            {
                 int currentIndex = i;
                 <div title="@dips[i].Name" class="grid-btn @(dips[i].State)" @onclick="() => Btn_SetFavourite(currentIndex)">
                     @(i + 1)
                 </div>
-			}
-		</div>
+            }
+        </div>
         <div id="select-btn-container">
             <button class="select-btn @(selectFavs ? "highlight" : "")" @onclick="() => selectFavs = true">
                 Favoriten wählen (@GetFavoriteCount()/5)
@@ -35,26 +36,37 @@
                 Topfavorit wählen (@GetTopfavoriteCount()/1)
             </button>
         </div>
-            @if (selectFavs) {
-                <div id="note">Wähle Favoriten aus!</div>
-            }
-            else
-            {
-                <div id="note">Wähle einen Topfavoriten aus!</div>
-            }
-            @if (favError) {
-                <div id="note" style="color: #ff5858">
-                    5 von 5 Favoriten ausgewählt.
-                </div>
-            }
-		<button id="submit-btn">Bewertung absenden</button>
-	</main>
+        @if (selectFavs)
+        {
+            <div id="note">Wähle Favoriten aus!</div>
+        }
+        else
+        {
+            <div id="note">Wähle einen Topfavoriten aus!</div>
+        }
+        @if (favError)
+        {
+            <div id="note" style="color: #ff5858">
+                5 von 5 Favoriten ausgewählt.
+            </div>
+        }
+        <button id="submit-btn" @onclick="Btn_Submit">Bewertung absenden</button>
+    </main>
 </div>
+
+<ConfirmationModal @ref="confirmModal"
+                   Title="Bewertung wirklich absenden?"
+                   Message="@modalMessage"
+                   OnYes="SubmitConfirmed"
+                   OnNo="SubmitCanceled">
+</ConfirmationModal>
 
 @code {
     List<Dip> dips = [];
     bool selectFavs = true;
     bool favError = false;
+    private ConfirmationModal confirmModal;
+    private string modalMessage = "";
 
     protected override void OnInitialized()
     {
@@ -118,6 +130,40 @@
         return dips.FindAll(d => d.State == "topfavorite").Count;
     }
 
+    private async Task Btn_Submit()
+    {
+        int favCount = dips.Count(d => d.State == "favorite");
+        int topfavCount = dips.Count(d => d.State == "topfavorite");
+
+        confirmModal.Open();
+
+        if (favCount == 5 && topfavCount == 1)
+        {
+            modalMessage = "Sind Sie sicher, dass Sie das abschicken möchten? Sie können danach nichts mehr ändern.";
+        }
+        else
+        {
+            modalMessage = "Sind Sie sicher, dass Sie das abschicken möchten? Sie können danach nichts mehr auswhälen oder ändern.";
+        }
+    }
+
+    //string conformationDialog;
+    private Task SubmitConfirmed()
+    { //Hier machst du den echten Submit
+
+        List<Dip> favouriteList = dips.FindAll(d => d.State == "favorite");
+        List<Dip> topfavouriteList = dips.FindAll(d => d.State == "topfavorite");
+
+        //In Datenbank speichern
+
+        return Task.CompletedTask;
+    }
+
+    private Task SubmitCanceled()
+    {
+        return Task.CompletedTask;
+    }
+
     class Dip
     {
         public string Name { get; }
@@ -129,4 +175,5 @@
             State = "";
         }
     }
+
 }
