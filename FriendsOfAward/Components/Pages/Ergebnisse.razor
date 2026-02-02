@@ -1,6 +1,6 @@
 ﻿@page "/Ergebnisse"
 @rendermode InteractiveServer
-@using static FoA_DA
+@using static DA
 @using ClosedXML.Excel
 @using System.Data;
 @inject IJSRuntime JS
@@ -16,7 +16,7 @@
             <th>Schüler</th>
             <th>Count</th>
         </tr>
-            @foreach((FoA_DA, int count) da in voting)
+            @foreach((DA, int count) da in voting)
             {
                 <tr>
                     <th>@da.Item1.ID</th>
@@ -31,7 +31,7 @@
 </form>
 
 @code {
-    List<(FoA_DA, int count)> voting = new();
+    List<(DA, int count)> voting = new();
     private bool isWorking = false; 
 
     protected override async Task OnInitializedAsync()
@@ -39,12 +39,12 @@
         //Ergebnisse vom Voting speichern
 
         //ID | Titel | Schueler | Count
-        DataTable da = DbWrapper.Wrapper.RunQuery("SELECT d.DaId, d.Titel, d.Schueler, COUNT(v.DaId) AS vote_count FROM foa_da AS d INNER JOIN FoA_Vote AS v ON d.DaId = v.DaId GROUP BY d.DaId, d.Titel, d.Schueler;");
-        FoA_DA result;
+        DataTable da = DbWrapper.Wrapper.RunQuery("SELECT d.DaId, d.Titel, d.Schueler, COUNT(v.DaId) AS vote_count FROM DA AS d INNER JOIN Vote AS v ON d.DaId = v.DaId GROUP BY d.DaId, d.Titel, d.Schueler;");
+        DA result;
         //Schleife für jede DA in Db, pro durchgang wird
         foreach (DataRow row in da.Rows)
         {
-            result = new FoA_DA((int)row[0], (string)row[1], (string)row[2]);
+            result = new DA((int)row[0], (string)row[1], (string)row[2]);
             int count = Convert.ToInt32(row[3]);
             voting.Add((result, count));
         }
@@ -66,7 +66,7 @@
             worksheet.Cell("D1").Value = "Count";
 
             int nr = 2; 
-            foreach((FoA_DA, int) v in voting)
+            foreach((DA, int) v in voting)
             {
                 worksheet.Row(nr).Cell("A").Value = v.Item1.ID;
                 worksheet.Row(nr).Cell("B").Value = v.Item1.Titel;

@@ -5,7 +5,7 @@ VisualStudioVersion = 18.0.11222.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FriendsOfAward", "FriendsOfAward\FriendsOfAward.csproj", "{7594C543-3FA4-4991-9948-05B09A63CF8F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassLibrary", "ClassLibrary\ClassLibrary.csproj", "{32BB9982-34F4-4650-C65C-1A7412177E46}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FoALib", "ClassLibrary\FoALib.csproj", "{32BB9982-34F4-4650-C65C-1A7412177E46}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

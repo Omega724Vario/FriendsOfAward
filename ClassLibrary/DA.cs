@@ -1,13 +1,13 @@
 ﻿using Google.Protobuf.Collections;
 using System.Data;
 
-public class FoA_DA
+public class DA
 {
     public int ID { get; set; } //in als NULL übergeben, Auto_Increment via sql
     public string Titel { get; set; }
     public string Schueler { get; set; }
 
-    public FoA_DA(int id, string titel, string schueler)
+    public DA(int id, string titel, string schueler)
     {
         ID = id;
         Titel = titel;
@@ -20,7 +20,7 @@ public class FoA_DA
 
         try
         {
-            DataTable dt = DbWrapper.Wrapper.RunQuery($"SELECT DaId, Titel FROM foA_dA;");
+            DataTable dt = DbWrapper.Wrapper.RunQuery($"SELECT DaId, Titel FROM DA;");
             foreach (DataRow row in dt.Rows)
             {
                 int id = Convert.ToInt32(row[0]);
@@ -50,19 +50,14 @@ public class FoA_DA
             return false; 
         }
     }
-    public static bool SaveDAtoDb(List<FoA_DA> foaDA)
+    public static bool SaveDAtoDb(List<DA> foaDA)
     {
         try
         {
             CreateClassesSQL();
-            DbWrapper.Wrapper.RunNonQuery($"SET FOREIGN_KEY_CHECKS = 0;" +
-                $"TRUNCATE TABLE foa_da;" +
-                $"TRUNCATE TABLE foa_qrcodes;" +
-                $"TRUNCATE TABLE FoA_Vote;" +
-                $"SET FOREIGN_KEY_CHECKS = 1;");
-            foreach (FoA_DA da in foaDA)
+            foreach (DA da in foaDA)
             {
-                string sql = $"INSERT INTO FoA_DA(Titel, Schueler) VALUES('{da.Titel}', '{da.Schueler}')";
+                string sql = $"INSERT INTO DA(Titel, Schueler) VALUES('{da.Titel}', '{da.Schueler}')";
                 DbWrapper.Wrapper.RunNonQuery(sql);
             }
             return true;
@@ -80,7 +75,7 @@ public class FoA_DA
         try
         {
             DbWrapper.Wrapper.RunNonQuery(
-                "CREATE TABLE IF NOT EXISTS FoA_DA (" +
+                "CREATE TABLE IF NOT EXISTS DA (" +
                 "DaId INT NOT NULL AUTO_INCREMENT, " +
                 "Titel VARCHAR(100) NOT NULL, " +
                 "Schueler VARCHAR(200) NOT NULL, " +
@@ -98,19 +93,19 @@ public class FoA_DA
                 "QrID VARCHAR(8) NOT NULL, " +
                 "PRIMARY KEY(QrID))");
 
-            DbWrapper.Wrapper.RunNonQuery("CREATE TABLE if NOT EXISTS FoA_Vote" +
+            DbWrapper.Wrapper.RunNonQuery("CREATE TABLE if NOT EXISTS Vote" +
                 "(VotingId INT NOT NULL AUTO_INCREMENT,QrId VARCHAR(8) NOT NULL," +
                 "Fav INT NOT NULL,DaOther1 INT NOT NULL," +
                 "DaOther2 INT NOT NULL,DaOther3 INT NOT NULL," +
                 "DaOther4 INT NOT NULL,DaOther5 INT NOT NULL," +
                 "PRIMARY KEY(VotingId), FOREIGN KEY(QrId) " +
                 "REFERENCES FoA_QrCodes(QrId) ON DELETE CASCADE," +
-                "FOREIGN KEY(Fav) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
-                "FOREIGN KEY(DaOther1) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
-                "FOREIGN KEY(DaOther2) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
-                "FOREIGN KEY(DaOther3) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
-                "FOREIGN KEY(DaOther4) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
-                "FOREIGN KEY(DaOther5) REFERENCES FoA_DA(DaId) ON DELETE CASCADE);");
+                "FOREIGN KEY(Fav) REFERENCES DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther1) REFERENCES DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther2) REFERENCES DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther3) REFERENCES DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther4) REFERENCES DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther5) REFERENCES DA(DaId) ON DELETE CASCADE);");
 
             return true;
         }
@@ -127,7 +122,7 @@ public class FoA_DA
         List<string> qrIds = new List<string>();
 
         DataTable table = DbWrapper.Wrapper.RunQuery($"SELECT QrId FROM FoA_QrCodes " +
-            $"WHERE QrId NOT IN (SELECT QrId FROM FoA_Vote)");
+            $"WHERE QrId NOT IN (SELECT QrId FROM Vote)");
         foreach (DataRow row in table.Rows)
         {
             qrIds.Add(row["QrId"].ToString());
@@ -141,8 +136,8 @@ public class FoA_DA
         try
         {
             DbWrapper.Wrapper.RunNonQuery("SET FOREIGN_KEY_CHECKS = 0;" +
-            "TRUNCATE TABLE foa_da;TRUNCATE TABLE foa_qrcodes;" +
-            "TRUNCATE TABLE FoA_Vote;" +
+            "TRUNCATE TABLE DA;TRUNCATE TABLE foa_qrcodes;" +
+            "TRUNCATE TABLE Vote;" +
             "SET FOREIGN_KEY_CHECKS = 1;");
             return (true, fehler);
         }
@@ -156,7 +151,7 @@ public class FoA_DA
     {
         try
         {
-            FoA_DA.CreateClassesSQL();
+            DA.CreateClassesSQL();
             foreach (string qrCode in qrCodes)
             {
                 DbWrapper.Wrapper.RunNonQuery($"INSERT INTO FoA_QrCodes (QrID) VALUES ('{qrCode}')");
@@ -167,46 +162,6 @@ public class FoA_DA
         {
             Console.WriteLine(ex);
             return false;
-        }
-    }
-}
-public class FoA_Vote
-{
-    int VotingId { get; }
-    string QrId { get; }
-    int Fav { get; }
-    int DaOther1 { get; }
-    int DaOther2 { get; }
-    int DaOther3 { get; }
-    int DaOther4 { get; }
-    int DaOther5 { get; }
-
-    public FoA_Vote(int votingId, string qrId, int fav, int o1, int o2, int o3, int o4, int o5)
-    {
-        VotingId = votingId;
-        QrId = qrId;
-        Fav = fav;
-        DaOther1 = o1;
-        DaOther2 = o2;
-        DaOther3 = o3;
-        DaOther4 = o4;
-        DaOther5 = o5;
-    }
-
-        ///<summary>
-        ///(string qrCode, Liste mit id von Diplomarbeiten (erster wert=top-fav)
-        ///</summary>
-    public static string SaveVote(string qr, List<int> titel)
-    {
-        try
-        {
-            int num = DbWrapper.Wrapper.RunNonQuery($"INSERT INTO FoA_Vote VALUES (NULL, {qr}, {titel[0]}, {titel[1]}, {titel[2]}, {titel[3]},{titel[4]};)");
-            if (num != 1) return $"Ein Fehler ist aufgetreten! Gespeicherte Votes: {num}";
-            return "";
-        }
-        catch (Exception ex)
-        {
-            return $"{ex}";
         }
     }
 }
