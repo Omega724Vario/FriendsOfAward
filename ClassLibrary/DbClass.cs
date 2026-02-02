@@ -54,12 +54,12 @@ public class FoA_DA
     {
         try
         {
+            CreateClassesSQL();
             DbWrapper.Wrapper.RunNonQuery($"SET FOREIGN_KEY_CHECKS = 0;" +
                 $"TRUNCATE TABLE foa_da;" +
                 $"TRUNCATE TABLE foa_qrcodes;" +
                 $"TRUNCATE TABLE foa_voting_system;" +
                 $"SET FOREIGN_KEY_CHECKS = 1;");
-            CreateClassesSQL();
             foreach (FoA_DA da in foaDA)
             {
                 string sql = $"INSERT INTO FoA_DA(Titel, Schueler) VALUES('{da.Titel}', '{da.Schueler}')";
