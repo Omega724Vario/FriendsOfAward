@@ -54,12 +54,12 @@ public class FoA_DA
     {
         try
         {
+            CreateClassesSQL();
             DbWrapper.Wrapper.RunNonQuery($"SET FOREIGN_KEY_CHECKS = 0;" +
                 $"TRUNCATE TABLE foa_da;" +
                 $"TRUNCATE TABLE foa_qrcodes;" +
-                $"TRUNCATE TABLE foa_voting_system;" +
+                $"TRUNCATE TABLE FoA_Vote;" +
                 $"SET FOREIGN_KEY_CHECKS = 1;");
-            CreateClassesSQL();
             foreach (FoA_DA da in foaDA)
             {
                 string sql = $"INSERT INTO FoA_DA(Titel, Schueler) VALUES('{da.Titel}', '{da.Schueler}')";
@@ -98,19 +98,19 @@ public class FoA_DA
                 "QrID VARCHAR(8) NOT NULL, " +
                 "PRIMARY KEY(QrID))");
 
-            DbWrapper.Wrapper.RunNonQuery("CREATE TABLE if NOT EXISTS `FoA_Voting_System`" +
-                "(`VotingId`INT NOT NULL AUTO_INCREMENT,`QrId` VARCHAR(8) NOT NULL," +
-                "`Fav` INT NOT NULL,`DaOther1` INT NOT NULL," +
-                "`DaOther2` INT NOT NULL,`DaOther3` INT NOT NULL," +
-                "`DaOther4` INT NOT NULL,`DaOther5` INT NOT NULL," +
-                "PRIMARY KEY(`VotingId`), FOREIGN KEY(`QrId`) " +
-                "REFERENCES FoA_QrCodes(`QrId`) ON DELETE CASCADE," +
-                "FOREIGN KEY(`Fav`) REFERENCES FoA_DA(`DaId`) ON DELETE CASCADE," +
-                "FOREIGN KEY(`DaOther1`) REFERENCES FoA_DA(`DaId`) ON DELETE CASCADE," +
-                "FOREIGN KEY(`DaOther2`) REFERENCES FoA_DA(`DaId`) ON DELETE CASCADE," +
-                "FOREIGN KEY(`DaOther3`) REFERENCES FoA_DA(`DaId`) ON DELETE CASCADE," +
-                "FOREIGN KEY(`DaOther4`) REFERENCES FoA_DA(`DaId`) ON DELETE CASCADE," +
-                "FOREIGN KEY(`DaOther5`) REFERENCES FoA_DA(`DaId`) ON DELETE CASCADE);");
+            DbWrapper.Wrapper.RunNonQuery("CREATE TABLE if NOT EXISTS FoA_Vote" +
+                "(VotingId INT NOT NULL AUTO_INCREMENT,QrId VARCHAR(8) NOT NULL," +
+                "Fav INT NOT NULL,DaOther1 INT NOT NULL," +
+                "DaOther2 INT NOT NULL,DaOther3 INT NOT NULL," +
+                "DaOther4 INT NOT NULL,DaOther5 INT NOT NULL," +
+                "PRIMARY KEY(VotingId), FOREIGN KEY(QrId) " +
+                "REFERENCES FoA_QrCodes(QrId) ON DELETE CASCADE," +
+                "FOREIGN KEY(Fav) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther1) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther2) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther3) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther4) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther5) REFERENCES FoA_DA(DaId) ON DELETE CASCADE);");
 
             return true;
         }
@@ -127,7 +127,7 @@ public class FoA_DA
         List<string> qrIds = new List<string>();
 
         DataTable table = DbWrapper.Wrapper.RunQuery($"SELECT QrId FROM FoA_QrCodes " +
-            $"WHERE QrId NOT IN (SELECT QrId FROM FoA_Voting_System)");
+            $"WHERE QrId NOT IN (SELECT QrId FROM FoA_Vote)");
         foreach (DataRow row in table.Rows)
         {
             qrIds.Add(row["QrId"].ToString());
@@ -142,7 +142,7 @@ public class FoA_DA
         {
             DbWrapper.Wrapper.RunNonQuery("SET FOREIGN_KEY_CHECKS = 0;" +
             "TRUNCATE TABLE foa_da;TRUNCATE TABLE foa_qrcodes;" +
-            "TRUNCATE TABLE foa_voting_system;" +
+            "TRUNCATE TABLE FoA_Vote;" +
             "SET FOREIGN_KEY_CHECKS = 1;");
             return (true, fehler);
         }
@@ -170,7 +170,7 @@ public class FoA_DA
         }
     }
 }
-public class FoA_Voting_System
+public class FoA_Vote
 {
     int VotingId { get; }
     string QrId { get; }
@@ -181,7 +181,7 @@ public class FoA_Voting_System
     int DaOther4 { get; }
     int DaOther5 { get; }
 
-    public FoA_Voting_System(int votingId, string qrId, int fav, int o1, int o2, int o3, int o4, int o5)
+    public FoA_Vote(int votingId, string qrId, int fav, int o1, int o2, int o3, int o4, int o5)
     {
         VotingId = votingId;
         QrId = qrId;
@@ -200,7 +200,7 @@ public class FoA_Voting_System
     {
         try
         {
-            int num = DbWrapper.Wrapper.RunNonQuery($"INSERT INTO foa_voting_system VALUES (NULL, {qr}, {titel[0]}, {titel[1]}, {titel[2]}, {titel[3]},{titel[4]};)");
+            int num = DbWrapper.Wrapper.RunNonQuery($"INSERT INTO FoA_Vote VALUES (NULL, {qr}, {titel[0]}, {titel[1]}, {titel[2]}, {titel[3]},{titel[4]};)");
             if (num != 1) return $"Ein Fehler ist aufgetreten! Gespeicherte Votes: {num}";
             return "";
         }

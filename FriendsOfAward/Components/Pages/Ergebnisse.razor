@@ -3,6 +3,7 @@
 @using static FoA_DA
 @using ClosedXML.Excel
 @using System.Data;
+@inject IJSRuntime JS
 
 <PageTitle>Ergebnisse</PageTitle>
 <h3>Ergebnisse</h3>
@@ -25,13 +26,12 @@
                 </tr>
             }
     </table>
-    @*<button type="button" @onclick="Btn_Download">Aktuelle Ergebnisse herunterladen</button>*@
-    @comment
+    <button class="btn btn-primary" @onclick="Btn_Download" disabled="@isWorking">
+        @(isWorking ? "Erstelle Excel..." : "Excel herunterladen")</button>
 </form>
 
 @code {
     List<(FoA_DA, int count)> voting = new();
-    private string comment ="";
     private bool isWorking = false; 
 
     protected override async Task OnInitializedAsync()
@@ -39,7 +39,7 @@
         //Ergebnisse vom Voting speichern
 
         //ID | Titel | Schueler | Count
-        DataTable da = DbWrapper.Wrapper.RunQuery("SELECT d.DaId, d.Titel, d.Schueler, COUNT(v.DaId) AS vote_count FROM foa_da AS d INNER JOIN foa_voting_system AS v ON d.DaId = v.DaId GROUP BY d.DaId, d.Titel, d.Schueler;");
+        DataTable da = DbWrapper.Wrapper.RunQuery("SELECT d.DaId, d.Titel, d.Schueler, COUNT(v.DaId) AS vote_count FROM foa_da AS d INNER JOIN FoA_Vote AS v ON d.DaId = v.DaId GROUP BY d.DaId, d.Titel, d.Schueler;");
         FoA_DA result;
         //Schleife für jede DA in Db, pro durchgang wird
         foreach (DataRow row in da.Rows)
@@ -50,56 +50,54 @@
         }
     }
 
-    //private byte[] CreateExcelFile()
-    // {
-    //     XLWorkbook? workbook = new XLWorkbook();
+    private byte[] CreateExcelFile()
+    {
+        XLWorkbook? workbook = new XLWorkbook();
 
-    //     voting = voting
-    //         .OrderByDescending(v => v.count)
-    //         .ToList();
+        voting = voting
+            .OrderByDescending(v => v.count)
+            .ToList();
 
-    //     // Referenz: https://www.youtube.com/watch?v=3DIKSjQMc5U
-    //     try
-    //     {
-    //         IXLWorksheet worksheet = workbook.Worksheets.Add("FoA_Ergebnisse");
-    //         worksheet.Cell("A1").Value = "Nr";
-    //         worksheet.Cell("B1").Value = "Titel";
-    //         worksheet.Cell("C1").Value = "Schüler";
-    //         worksheet.Cell("D1").Value = "Count";
+        // Referenz: https://www.youtube.com/watch?v=3DIKSjQMc5U
+            IXLWorksheet worksheet = workbook.Worksheets.Add("FoA_Ergebnisse");
+            worksheet.Cell("A1").Value = "Nr";
+            worksheet.Cell("B1").Value = "Titel";
+            worksheet.Cell("C1").Value = "Schüler";
+            worksheet.Cell("D1").Value = "Count";
 
-    //         int nr = 2; 
-    //         foreach((FoA_DA, int) v in voting)
-    //         {
-    //             worksheet.Row(nr).Cell("A").Value = v.Item1.ID;
-    //             worksheet.Row(nr).Cell("B").Value = v.Item1.Titel;
-    //             worksheet.Row(nr).Cell("C").Value = v.Item1.Schueler;
-    //             worksheet.Row(nr).Cell("D").Value = v.Item2;
-    //             nr++; 
-    //         }
+            int nr = 2; 
+            foreach((FoA_DA, int) v in voting)
+            {
+                worksheet.Row(nr).Cell("A").Value = v.Item1.ID;
+                worksheet.Row(nr).Cell("B").Value = v.Item1.Titel;
+                worksheet.Row(nr).Cell("C").Value = v.Item1.Schueler;
+                worksheet.Row(nr).Cell("D").Value = v.Item2;
+                nr++; 
+            }
 
-    //         IXLRange? range = worksheet.Range($"A1:D{voting.Count+1}"); 
-    //         IXLTable table = range.CreateTable(); 
-    //         table.Theme = XLTableTheme.TableStyleLight10; 
+            IXLRange? range = worksheet.Range($"A1:D{voting.Count+1}"); 
+            IXLTable table = range.CreateTable(); 
+            table.Theme = XLTableTheme.TableStyleLight10; 
 
-    //         worksheet.Cell($"A{voting.Count + 1}").Value = "Total Votes: ";
-    //         worksheet.Cell($"D{voting.Count + 1}").FormulaA1 = $"SUM(D2:D{voting.Count + 1})"; 
+            worksheet.Cell($"A{voting.Count + 1}").Value = "Total Votes: ";
+            worksheet.Cell($"D{voting.Count + 1}").FormulaA1 = $"SUM(D2:D{voting.Count + 1})"; 
 
-    //         worksheet.Row(voting.Count + 1).Style.Font.Bold = true; 
-    //         string filename = $"{DateTime.Today.Year}_Ergebnisse_FriendsOfAward.xlsx"; 
-    //         workbook.SaveAs(filename); 
+            worksheet.Row(voting.Count + 1).Style.Font.Bold = true; 
 
-    //         new Program().Export()
-    //         return true; 
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         Console.WriteLine(ex);
-    //         return false;   
-    //     }
-    // }
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return stream.ToArray();
+    }
 
-    // private void Btn_Download()
-    // {
-    //     isWorking = CreateExcelFile(); 
-    // }
+    private async Task Btn_Download()
+    {
+        var bytes = CreateExcelFile();
+        var fileName = $"{DateTime.Today.Year}_Ergebnisse_FriendsOfAward.xlsx";
+
+        await JS.InvokeVoidAsync(
+            "downloadFile",
+            fileName,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            bytes);
+    }
 }
