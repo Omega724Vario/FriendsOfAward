@@ -11,6 +11,8 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
     private ClaimsPrincipal? _currentUser = null;
     private bool _isInitialized = false;
 
+    private static readonly TimeSpan SessionDuration = TimeSpan.FromMinutes(30);
+
     public CustomAuthStateProvider(ProtectedLocalStorage sessionStorage)
     {
         _sessionStorage = sessionStorage;
@@ -23,12 +25,22 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         {
             try
             {
-                var storageResult = await _sessionStorage.GetAsync<string>("currentUser");
-                if (storageResult.Success && !string.IsNullOrEmpty(storageResult.Value))
+                var storageResult = await _sessionStorage.GetAsync<AuthSession>("authSession");
+                if (storageResult.Success && storageResult.Value != null)
                 {
-                    var username = storageResult.Value;
-                    ClaimsIdentity identity = new([new Claim(ClaimTypes.Name, username)], "CustomAuthType");
-                    _currentUser = new ClaimsPrincipal(identity);
+                    var session = storageResult.Value;
+                    
+                    // Check if session has expired
+                    if (DateTime.UtcNow <= session.ExpiresAt)
+                    {
+                        ClaimsIdentity identity = new([new Claim(ClaimTypes.Name, session.Username)], "CustomAuthType");
+                        _currentUser = new ClaimsPrincipal(identity);
+                    }
+                    else
+                    {
+                        // Session expired, clear it
+                        await _sessionStorage.DeleteAsync("authSession");
+                    }
                 }
             }
             catch
@@ -57,7 +69,12 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
 
         try
         {
-            await _sessionStorage.SetAsync("currentUser", username);
+            var session = new AuthSession
+            {
+                Username = username,
+                ExpiresAt = DateTime.UtcNow.Add(SessionDuration)
+            };
+            await _sessionStorage.SetAsync("authSession", session);
         }
         catch { /* Handle error */ }
 
@@ -69,10 +86,16 @@ public class CustomAuthStateProvider : AuthenticationStateProvider
         _currentUser = null;
         try
         {
-            await _sessionStorage.DeleteAsync("currentUser");
+            await _sessionStorage.DeleteAsync("authSession");
         }
         catch { /* Handle error */ }
 
         NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
+    }
+    
+    private class AuthSession
+    {
+        public string Username { get; set; } = string.Empty;
+        public DateTime ExpiresAt { get; set; }
     }
 }

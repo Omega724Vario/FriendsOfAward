@@ -2,6 +2,7 @@
 @using FriendsOfAward.Components.Layout
 @using Microsoft.AspNetCore.Components.Authorization
 @inject NavigationManager MyNavMgr
+@inject AuthenticationStateProvider AuthStateProvider
 @layout UserLayout
 @rendermode InteractiveServer
 
@@ -14,8 +15,6 @@
 		<div id="note">
 			<b>
 				Geben Sie uns Ihre persönlichen Favoriten bekannt!<br />
-				@* Einmal klicken = Favorit (max. 5)<br />
-				Nochmal klicken = Topfavorit (max. 1)<br /> *@
 			</b>
 			Diese Abstimmung ist anonym und auf ein Gerät beschränkt.<br />
 		</div>
@@ -72,9 +71,26 @@
         }
     }
 
-    void GoToLogin()
+    async Task GoToLogin()
     {
-        MyNavMgr.NavigateTo("/Login");
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            if (authState.User.Identity?.IsAuthenticated == true)
+            {
+                // Already logged in, go directly to dashboard
+                MyNavMgr.NavigateTo("/Teilnehmer");
+            }
+            else
+            {
+                MyNavMgr.NavigateTo("/Login");
+            }
+        }
+        catch
+        {
+            // If auth check fails (e.g., during prerender), go to login
+            MyNavMgr.NavigateTo("/Login");
+        }
     }
 
     void Btn_SetFavourite(int index)

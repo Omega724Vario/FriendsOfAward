@@ -1,0 +1,36 @@
+@using FriendsOfAward
+@using FriendsOfAward.Components.UI.Theme
+@using Microsoft.AspNetCore.Components.Authorization
+@inject CustomAuthStateProvider AuthProvider
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<AuthorizeView>
+    <Authorized>
+        <div class="btn-container">
+            <button class="ui-btn destructive mt" @onclick="Logout">Logout</button>
+            <ThemeToggle />
+        </div>
+        <div class="ui-card mt">Admin: @context.User.Identity?.Name</div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="ui-card mt">Nicht angemeldet</div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await AuthProvider.InitializeAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task Logout()
+    {
+        await AuthProvider.Logout();
+        Navigation.NavigateTo("/Login");
+    }
+}

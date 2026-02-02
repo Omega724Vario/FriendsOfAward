@@ -2,7 +2,6 @@
 @using FriendsOfAward.Components.Auth;
 @using FriendsOfAward
 @using Microsoft.AspNetCore.Components.Authorization
-@inject CustomAuthStateProvider AuthProvider
 @inject NavigationManager Navigation
 @inherits LayoutComponentBase
 
@@ -27,46 +26,17 @@
         </NavLink>
 
         <div class="spacer"></div>
-
-        <div class="sidebar-footer">
-            <button class="ui-btn destructive" @onclick="ResetApp">Reset</button>
-            <ThemeToggle />
-        </div>
-        @* TODO NEXT *@
-        <AuthorizeView>
-            <Authorized>
-                <div class="ui-card mt">Admin: @context.User.Identity?.Name</div>
-                <button class="ui-btn destructive mt" @onclick="Logout">Logout</button>
-            </Authorized>
-            <NotAuthorized>
-                <div class="ui-card mt">Nicht angemeldet</div>
-            </NotAuthorized>
-        </AuthorizeView>
+        
+        <AuthSection />
     </nav>
     <div class="content">
-        @* <AuthView> *@
-            @Body
-        @* </AuthView> *@
+        @Body
     </div>
 </div>
 
 @code {
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await AuthProvider.InitializeAsync();
-        }
-    }
-
     private void ResetApp()
     {
         //Reset FriendsofAward
-    }
-
-    private async Task Logout()
-    {
-        await AuthProvider.Logout();
-        Navigation.NavigateTo("/Login");
     }
 }
