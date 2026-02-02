@@ -40,7 +40,7 @@
             <th>Schüler</th>
         </tr>
 
-        @foreach (FoA_DA da in result)
+        @foreach (DA da in result)
         {
             <tr>
                 <td> @da.ID </td>
@@ -57,7 +57,7 @@
     private string comment = "";
     private string errorMessage = "";
     private bool isProcessing = false;
-    List<FoA_DA> result = new List<FoA_DA>();
+    List<DA> result = new List<DA>();
 
 
     // Datei wird in variable gespeichert
@@ -98,7 +98,7 @@
         try
         {
             //Inhalt wird gelesen und geprüft
-            List<FoA_DA> list = await ReadFile(uploadedFile);
+            List<DA> list = await ReadFile(uploadedFile);
 
             if(list.Count == 0)
             {
@@ -107,7 +107,7 @@
                 return; 
             }
             // Datei hat Inhalt und kann in DB gespeichert werden
-            bool isWorking = FoA_DA.SaveDAtoDb(list);
+            bool isWorking = DA.SaveDAtoDb(list);
             comment = isWorking ? "Upload erfolgreich" : "Fehler beim Speichern";
             StateHasChanged();
         }
@@ -121,7 +121,7 @@
         StateHasChanged();
     }
 
-    async Task<List<FoA_DA>> ReadFile(IBrowserFile file)
+    async Task<List<DA>> ReadFile(IBrowserFile file)
     {
         try
         {
@@ -139,10 +139,10 @@
                 if (!string.IsNullOrEmpty(row.Cell(1).GetString()) &&
                 !string.IsNullOrEmpty(row.Cell(2).GetString()))
                 {
-                    result.Add(new FoA_DA(
+                    result.Add(new DA(
                         row.Cell(1).GetValue<int>(),
-                        row.Cell(3).GetString(),
-                        row.Cell(4).GetString()
+                        row.Cell(2).GetString(),
+                        row.Cell(3).GetString()
                     ));
                 }
             }
