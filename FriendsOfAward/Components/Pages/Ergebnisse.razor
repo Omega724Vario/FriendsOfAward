@@ -40,8 +40,10 @@
     {
         //Ergebnisse vom Voting speichern
 
+        string sql = $"SELECT d.DaId, d.Titel, d.Schueler," +
+        "COUNT(v.DaId) AS vote_count FROM foa_da AS d INNER JOIN foa_voting AS v ON d.DaId = v.DaId GROUP BY d.DaId, d.Titel, d.Schueler;";
         //ID | Titel | Schueler | Count
-        DataTable da = DbWrapper.Wrapper.RunQuery("SELECT d.DaId, d.Titel, d.Schueler, COUNT(v.DaId) AS vote_count FROM DA AS d INNER JOIN Vote AS v ON d.DaId = v.DaId GROUP BY d.DaId, d.Titel, d.Schueler;");
+        DataTable da = DbWrapper.Wrapper.RunQuery(sql);
         DA result;
         //Schleife für jede DA in Db, pro durchgang wird
         foreach (DataRow row in da.Rows)

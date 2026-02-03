@@ -17,7 +17,7 @@ public class DA
     {
         // id und Titel übergabe
         List<(int, string)> result = new List<(int, string)> ();
-        string sql = $"SELECT DaId, Titel FROM DA;";
+        string sql = $"SELECT DaId, Titel FROM FoA_DA;";
         try
         {
             DataTable dt = DbWrapper.Wrapper.RunQuery(sql);
@@ -75,7 +75,7 @@ public class DA
             CreateClassesSQL();
             foreach (DA da in foaDA)
             {
-                string sql = $"INSERT INTO DA(Titel, Schueler) VALUES('{da.Titel}', '{da.Schueler}')";
+                string sql = $"INSERT INTO FoA_DA(Titel, Schueler) VALUES('{da.Titel}', '{da.Schueler}')";
                 DbWrapper.Wrapper.RunNonQuery(sql);
             }
             return true;
@@ -93,25 +93,25 @@ public class DA
         try
         {
             DbWrapper.Wrapper.RunNonQuery(
-                "CREATE TABLE IF NOT EXISTS DA (" +
+                "CREATE TABLE IF NOT EXISTS FoA_DA (" +
                 "DaId INT NOT NULL AUTO_INCREMENT, " +
                 "Titel VARCHAR(100) NOT NULL, " +
                 "Schueler VARCHAR(200) NOT NULL, " +
-                "PRIMARY KEY (DaId))");
+                "PRIMARY KEY (DaId));");
 
             DbWrapper.Wrapper.RunNonQuery(
                 "CREATE TABLE IF NOT EXISTS FoA_Admin (" +
                 "BenutzerId INT AUTO_INCREMENT," +
-"Benutzername VARCHAR(50) NOT NULL UNIQUE,"+
-"Passwort VARCHAR(255),"+
-                "PRIMARY KEY(BenutzerId))");
+                "Benutzername VARCHAR(50) NOT NULL UNIQUE,"+
+                "Passwort VARCHAR(255),"+
+                "PRIMARY KEY(BenutzerId));");
 
             DbWrapper.Wrapper.RunNonQuery(
                 "CREATE TABLE IF NOT EXISTS FoA_QrCodes (" +
                 "QrID VARCHAR(8) NOT NULL, " +
-                "PRIMARY KEY(QrID))");
+                "PRIMARY KEY(QrID));");
 
-            DbWrapper.Wrapper.RunNonQuery("CREATE TABLE if NOT EXISTS Vote" +
+            DbWrapper.Wrapper.RunNonQuery("CREATE TABLE if NOT EXISTS FoA_Voting" +
                 "(VotingId INT NOT NULL AUTO_INCREMENT,QrId VARCHAR(8) NOT NULL," +
                 "Fav INT NOT NULL,DaOther1 INT NOT NULL," +
                 "DaOther2 INT NOT NULL,DaOther3 INT NOT NULL," +
@@ -119,11 +119,11 @@ public class DA
                 "PRIMARY KEY(VotingId), FOREIGN KEY(QrId) " +
                 "REFERENCES FoA_QrCodes(QrId) ON DELETE CASCADE," +
                 "FOREIGN KEY(Fav) REFERENCES DA(DaId) ON DELETE CASCADE," +
-                "FOREIGN KEY(DaOther1) REFERENCES DA(DaId) ON DELETE CASCADE," +
-                "FOREIGN KEY(DaOther2) REFERENCES DA(DaId) ON DELETE CASCADE," +
-                "FOREIGN KEY(DaOther3) REFERENCES DA(DaId) ON DELETE CASCADE," +
-                "FOREIGN KEY(DaOther4) REFERENCES DA(DaId) ON DELETE CASCADE," +
-                "FOREIGN KEY(DaOther5) REFERENCES DA(DaId) ON DELETE CASCADE);");
+                "FOREIGN KEY(DaOther1) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther2) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther3) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther4) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(DaOther5) REFERENCES FoA_DA(DaId) ON DELETE CASCADE);");
 
             return true;
         }
@@ -140,7 +140,7 @@ public class DA
         List<string> qrIds = new List<string>();
 
         DataTable table = DbWrapper.Wrapper.RunQuery($"SELECT QrId FROM FoA_QrCodes " +
-            $"WHERE QrId NOT IN (SELECT QrId FROM Vote)");
+            $"WHERE QrId NOT IN (SELECT QrId FROM FoA_Voting)");
         foreach (DataRow row in table.Rows)
         {
             qrIds.Add(row["QrId"].ToString());
@@ -154,8 +154,8 @@ public class DA
         try
         {
             DbWrapper.Wrapper.RunNonQuery("SET FOREIGN_KEY_CHECKS = 0;" +
-            "TRUNCATE TABLE DA;TRUNCATE TABLE foa_qrcodes;" +
-            "TRUNCATE TABLE Vote;" +
+            "TRUNCATE TABLE foa_da;TRUNCATE TABLE foa_qrcodes;" +
+            "TRUNCATE TABLE foa_voting;" +
             "SET FOREIGN_KEY_CHECKS = 1;");
             return (true, fehler);
         }
