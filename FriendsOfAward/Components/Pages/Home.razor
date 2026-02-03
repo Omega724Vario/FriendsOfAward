@@ -51,6 +51,9 @@
                 5 von 5 Favoriten ausgewählt.
             </div>
         }
+        <div id="note" style="color: #ff5858">
+            @error
+        </div>
         <button id="submit-btn" @onclick="Btn_Submit">Bewertung absenden</button>
     </main>
 
@@ -73,12 +76,13 @@
     private ConfirmationModal confirmModal;
     private string modalMessage = "";
     private string title = "Friends of Award";
+    private string error = "";
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
 
-        List<(int, string)> dpls = FoA_DA.GetDAs();
+        List<(int, string)> dpls = DA.GetDAs();
 
         if (dpls.Count != 20)
         {
@@ -87,8 +91,7 @@
 
                 dpls.Add((i + 1, Random.Shared.Next(0, 120).ToString()));
             }
-            title = "ERROR";
-
+            error = "ERROR - etwas ist schiefgelaufen";
         }
 
         for (int i = 0; i < 20; i++)
@@ -210,7 +213,7 @@
 
 
         //qr Code und Title DPLs (erster Topfavorote)
-        FoA_Voting_System.SaveVote("", favouriteIds);
+        Vote.SaveVote("", favouriteIds);
 
 
         return Task.CompletedTask;

@@ -58,7 +58,6 @@
     private List<string> passwordList = new();
     private string? QrPngBase64;
     private bool isLoading = false;
-        base.OnInitialized();
 
     private async Task Btn_QRCodesGenerieren()
     {
@@ -105,7 +104,7 @@
         }
         isLoading = false;
 
-        FoA_QrCodes.SaveQRtoDb(passwordList);
+        DA.SaveQRtoDb(passwordList);
 
         StateHasChanged();
     }
