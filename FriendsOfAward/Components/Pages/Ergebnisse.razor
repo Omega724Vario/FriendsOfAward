@@ -59,34 +59,34 @@
             .ToList();
 
         // Referenz: https://www.youtube.com/watch?v=3DIKSjQMc5U
-            IXLWorksheet worksheet = workbook.Worksheets.Add("FoA_Ergebnisse");
-            worksheet.Cell("A1").Value = "Nr";
-            worksheet.Cell("B1").Value = "Titel";
-            worksheet.Cell("C1").Value = "Schüler";
-            worksheet.Cell("D1").Value = "Count";
+        IXLWorksheet worksheet = workbook.Worksheets.Add("FoA_Ergebnisse");
+        worksheet.Cell("A1").Value = "Nr";
+        worksheet.Cell("B1").Value = "Titel";
+        worksheet.Cell("C1").Value = "Schüler";
+        worksheet.Cell("D1").Value = "Count";
 
-            int nr = 2; 
-            foreach((DA, int) v in voting)
-            {
-                worksheet.Row(nr).Cell("A").Value = v.Item1.ID;
-                worksheet.Row(nr).Cell("B").Value = v.Item1.Titel;
-                worksheet.Row(nr).Cell("C").Value = v.Item1.Schueler;
-                worksheet.Row(nr).Cell("D").Value = v.Item2;
-                nr++; 
-            }
+        int nr = 2; 
+        foreach((DA, int) v in voting)
+        {
+            worksheet.Row(nr).Cell("A").Value = v.Item1.ID;
+            worksheet.Row(nr).Cell("B").Value = v.Item1.Titel;
+            worksheet.Row(nr).Cell("C").Value = v.Item1.Schueler;
+            worksheet.Row(nr).Cell("D").Value = v.Item2;
+            nr++; 
+        }
 
-            IXLRange? range = worksheet.Range($"A1:D{voting.Count+1}"); 
-            IXLTable table = range.CreateTable(); 
-            table.Theme = XLTableTheme.TableStyleLight10; 
+        IXLRange? range = worksheet.Range($"A1:D{voting.Count+1}"); 
+        IXLTable table = range.CreateTable(); 
+        table.Theme = XLTableTheme.TableStyleLight10; 
 
-            worksheet.Cell($"A{voting.Count + 1}").Value = "Total Votes: ";
-            worksheet.Cell($"D{voting.Count + 1}").FormulaA1 = $"SUM(D2:D{voting.Count + 1})"; 
+        worksheet.Cell($"A{voting.Count + 1}").Value = "Total Votes: ";
+        worksheet.Cell($"D{voting.Count + 1}").FormulaA1 = $"SUM(D2:D{voting.Count + 1})"; 
 
-            worksheet.Row(voting.Count + 1).Style.Font.Bold = true; 
+        worksheet.Row(voting.Count + 1).Style.Font.Bold = true; 
 
-            using var stream = new MemoryStream();
-            workbook.SaveAs(stream);
-            return stream.ToArray();
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        return stream.ToArray();
     }
 
     private async Task Btn_Download()
