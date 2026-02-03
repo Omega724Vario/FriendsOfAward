@@ -222,26 +222,30 @@ else
 
     //string conformationDialog;
     private Task SubmitConfirmed()
-    { //Hier machst du den echten Submit
-
+    {
         List<Dip> favouriteList = dips.FindAll(d => d.State == "favorite");
         List<Dip> topfavouriteList = dips.FindAll(d => d.State == "topfavorite");
 
-        //In Datenbank speichern
+
+        int topFavId = topfavouriteList.Count == 1 ? topfavouriteList[0].Id : -1;
+
         List<int> favouriteIds = new();
-
-        if (topfavouriteList.Count == 1)
-            favouriteIds.Add(topfavouriteList[0].Id);
-
-        foreach (Dip d in favouriteList)
+        for (int i = 0; i < 5; i++)
         {
-            favouriteIds.Add(d.Id);
+            if (i < favouriteList.Count)
+            {
+                Dip d = favouriteList[i];
+                favouriteIds.Add(d.Id);
+            }
+            else
+            {
+                favouriteIds.Add(-1);
+            }
         }
 
 
-        //qr Code und Title DPLs (erster Topfavorote)
-        error = Vote.SaveVote(userParam, favouriteIds);
-
+        Vote newVote = new(userParam, topFavId, favouriteIds[0], favouriteIds[1], favouriteIds[2], favouriteIds[3], favouriteIds[4]);
+        error = Vote.SaveVote(userParam);
 
         return Task.CompletedTask;
     }

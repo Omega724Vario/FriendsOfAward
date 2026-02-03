@@ -1,6 +1,5 @@
 ﻿public class Vote
 {
-    int VotingId { get; }
     string QrId { get; }
     int Fav { get; }
     int DaOther1 { get; }
@@ -9,9 +8,8 @@
     int DaOther4 { get; }
     int DaOther5 { get; }
 
-    public Vote(int votingId, string qrId, int fav, int o1, int o2, int o3, int o4, int o5)
+    public Vote(string qrId, int fav, int o1, int o2, int o3, int o4, int o5)
     {
-        VotingId = votingId;
         QrId = qrId;
         Fav = fav;
         DaOther1 = o1;
@@ -42,7 +40,7 @@
     ///<summary>
     ///(string qrCode, Liste mit id von Diplomarbeiten (erster wert=top-fav)
     ///</summary>
-    public static string SaveVote(string qr, List<int> titel)
+    public string SaveVote(string qr)
     {
         try
         {
@@ -52,7 +50,14 @@
                 return "Ungültiger User code";
             }
 
-            int num = DbWrapper.Wrapper.RunNonQuery($"INSERT INTO Vote VALUES (NULL, '{qr}', {titel[0]}, {titel[1]}, {titel[2]}, {titel[3]}, {titel[4]})");
+            int num = DbWrapper.Wrapper.RunNonQuery(@$"INSERT INTO Vote VALUES (NULL, '{qr}',
+                {FormatId(Fav)},
+                {FormatId(DaOther1)},
+                {FormatId(DaOther2)},
+                {FormatId(DaOther3)},
+                {FormatId(DaOther4)},
+                {FormatId(DaOther5)})");
+
             if (num != 1) return $"Ein Fehler ist aufgetreten! Gespeicherte Votes: {num}";
             return "";
         }
@@ -60,5 +65,10 @@
         {
             return $"{ex}";
         }
+    }
+
+    private static string FormatId(int id)
+    {
+        return id == -1 ? "NULL" : id.ToString();
     }
 }
