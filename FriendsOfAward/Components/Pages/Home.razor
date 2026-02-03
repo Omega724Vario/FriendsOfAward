@@ -245,7 +245,7 @@ else
 
 
         Vote newVote = new(userParam, topFavId, favouriteIds[0], favouriteIds[1], favouriteIds[2], favouriteIds[3], favouriteIds[4]);
-        error = Vote.SaveVote(userParam);
+        error = newVote.SaveVote(userParam);
 
         return Task.CompletedTask;
     }
