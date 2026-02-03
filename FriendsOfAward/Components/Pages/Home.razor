@@ -20,7 +20,19 @@
                 <b>Kein gültiger Zugangslink</b><br />
                 Bitte scannen Sie den QR-Code, um an der Abstimmung teilzunehmen.
             </div>
-            <button class="ui-btn primary" @onclick="GoToLogin">Admin Login</button>
+            <div id="manual-entry">
+                <input type="text" @bind="manualQrCode" @bind:event="oninput" placeholder="QR-Code eingeben" class="ui-input" />
+                <button class="ui-btn primary" @onclick="SubmitManualQrCode">Code bestätigen</button>
+            </div>
+            @if (!string.IsNullOrEmpty(manualEntryError))
+            {
+                <div id="note" style="color: #ff5858">
+                    @manualEntryError
+                </div>
+            }
+            <button class="admin-btn" @onclick="GoToLogin" title="Admin Login">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M141.66,133.66l-40,40a8,8,0,0,1-11.32-11.32L116.69,136H24a8,8,0,0,1,0-16h92.69L90.34,93.66a8,8,0,0,1,11.32-11.32l40,40A8,8,0,0,1,141.66,133.66ZM200,32H136a8,8,0,0,0,0,16h56V208H136a8,8,0,0,0,0,16h64a8,8,0,0,0,8-8V40A8,8,0,0,0,200,32Z"></path></svg>
+            </button>
         </main>
     </div>
 }
@@ -92,6 +104,8 @@ else
     private string error = "";
     private string userParam = "";
     private bool qrCodeValid = false;
+    private string manualQrCode = "";
+    private string manualEntryError = "";
 
     protected override void OnInitialized()
     {
@@ -253,6 +267,27 @@ else
     private Task SubmitCanceled()
     {
         return Task.CompletedTask;
+    }
+
+    private void SubmitManualQrCode()
+    {
+        manualEntryError = "";
+        
+        if (string.IsNullOrWhiteSpace(manualQrCode))
+        {
+            manualEntryError = "Bitte geben Sie einen QR-Code ein.";
+            return;
+        }
+
+        if (Vote.QrCodeExists(manualQrCode))
+        {
+            // Navigate to the same page with the QR code as parameter
+            MyNavMgr.NavigateTo($"/?u={Uri.EscapeDataString(manualQrCode)}", forceLoad: true);
+        }
+        else
+        {
+            manualEntryError = "Ungültiger QR-Code. Bitte versuchen Sie es erneut.";
+        }
     }
 
     class Dip
