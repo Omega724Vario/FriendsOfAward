@@ -97,19 +97,19 @@ public class DA
                 "DaId INT NOT NULL AUTO_INCREMENT, " +
                 "Titel VARCHAR(100) NOT NULL, " +
                 "Schueler VARCHAR(200) NOT NULL, " +
-                "PRIMARY KEY (DaId))");
+                "PRIMARY KEY (DaId));");
 
             DbWrapper.Wrapper.RunNonQuery(
                 "CREATE TABLE IF NOT EXISTS FoA_Admin (" +
                 "BenutzerId INT AUTO_INCREMENT," +
-"Benutzername VARCHAR(50) NOT NULL UNIQUE,"+
-"Passwort VARCHAR(255),"+
-                "PRIMARY KEY(BenutzerId))");
+                "Benutzername VARCHAR(50) NOT NULL UNIQUE,"+
+                "Passwort VARCHAR(255),"+
+                "PRIMARY KEY(BenutzerId));");
 
             DbWrapper.Wrapper.RunNonQuery(
                 "CREATE TABLE IF NOT EXISTS FoA_QrCodes (" +
                 "QrID VARCHAR(8) NOT NULL, " +
-                "PRIMARY KEY(QrID))");
+                "PRIMARY KEY(QrID));");
 
             DbWrapper.Wrapper.RunNonQuery("CREATE TABLE if NOT EXISTS FoA_Voting" +
                 "(VotingId INT NOT NULL AUTO_INCREMENT,QrId VARCHAR(8) NOT NULL," +
