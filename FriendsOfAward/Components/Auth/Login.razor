@@ -57,11 +57,6 @@
 
 	bool IsValidUser(string username, string password)
 	{
-		// TODO: Hier echte Validierung gegen eine Datenbank oder einen anderen Dienst durchführen
-		if (username == "admin" && password == "admin")
-		{
-			return true;
-		}
-		return false;
+		return DA.IsValidUser(username, password);
 	}
 }

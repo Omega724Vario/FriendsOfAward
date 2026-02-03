@@ -50,6 +50,24 @@ public class DA
             return false; 
         }
     }
+
+    public static bool IsValidUser(string username, string password)
+    {
+        string sql = $"SELECT Benutzername FROM FoA_Admin WHERE Benutzername = '{username}' AND Passwort = '{password}'";
+        DataTable dt = new DataTable();
+        try
+        {
+            dt = DbWrapper.Wrapper.RunQuery(sql);
+            if (dt.Rows.Count <= 0) return false;
+            else return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return false;
+        }
+    }
+
     public static bool SaveDAtoDb(List<DA> foaDA)
     {
         try
