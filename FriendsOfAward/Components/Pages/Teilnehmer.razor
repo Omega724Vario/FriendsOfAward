@@ -84,7 +84,7 @@
             passwordList.Add(password);
 
 
-            var UrlPayloud = new PayloadGenerator.Url(NavMananger.BaseUri + "User/" + password);
+            var UrlPayloud = new PayloadGenerator.Url(NavMananger.BaseUri + "?u=" + password);
             string payload = UrlPayloud.ToString();
 
             QRCodeGenerator qrGenerator = new QRCodeGenerator();

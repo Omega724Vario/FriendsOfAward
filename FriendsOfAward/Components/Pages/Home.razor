@@ -2,6 +2,7 @@
 @using FriendsOfAward.Components.Layout
 @using Microsoft.AspNetCore.Components.Authorization
 @using FriendsOfAward.Components.UI.Components
+@using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager MyNavMgr
 @inject AuthenticationStateProvider AuthStateProvider
 @layout UserLayout
@@ -9,65 +10,77 @@
 
 <PageTitle>Home</PageTitle>
 
-
-<div id="blur-ball"></div>
-<div id="wrapper">
-    <main id="content">
-        <span id="title">@title</span>
-        <div id="note">
-            <b>
-                Geben Sie uns Ihre persönlichen Favoriten bekannt!<br />
-            </b>
-            Diese Abstimmung ist anonym und auf ein Gerät beschränkt.<br />
-        </div>
-        <div id="grid">
-            @for (int i = 0; i < dips.Count; i++)
+@if (string.IsNullOrEmpty(userParam) || !qrCodeValid)
+{
+    <div id="blur-ball"></div>
+    <div id="wrapper">
+        <main id="content">
+            <span id="title">@title</span>
+            <div id="note">
+                <b>Kein gültiger Zugangslink</b><br />
+                Bitte scannen Sie den QR-Code, um an der Abstimmung teilzunehmen.
+            </div>
+            <button class="ui-btn primary" @onclick="GoToLogin">Admin Login</button>
+        </main>
+    </div>
+}
+else
+{
+    <div id="blur-ball"></div>
+    <div id="wrapper">
+        <main id="content">
+            <span id="title">@title</span>
+            <div id="note">
+                <b>
+                    Geben Sie uns Ihre persönlichen Favoriten bekannt!<br />
+                </b>
+                Diese Abstimmung ist anonym und auf ein Gerät beschränkt.<br />
+            </div>
+            <div id="grid">
+                @for (int i = 0; i < dips.Count; i++)
+                {
+                    int currentIndex = i;
+                    <div title="@dips[i].Name" class="grid-btn @(dips[i].State)" @onclick="() => Btn_SetFavourite(currentIndex)">
+                        @(i + 1)
+                    </div>
+                }
+            </div>
+            <div id="select-btn-container">
+                <button class="select-btn @(selectFavs ? "highlight" : "")" @onclick="() => selectFavs = true">
+                    Favoriten wählen (@GetFavoriteCount()/5)
+                </button>
+                <button class="select-btn @(selectFavs ? "" : "highlight")" @onclick="() => selectFavs = false">
+                    Topfavorit wählen (@GetTopfavoriteCount()/1)
+                </button>
+            </div>
+            @if (selectFavs)
             {
-                int currentIndex = i;
-                <div title="@dips[i].Name" class="grid-btn @(dips[i].State)" @onclick="() => Btn_SetFavourite(currentIndex)">
-                    @(i + 1)
+                <div id="note">Wähle Favoriten aus!</div>
+            }
+            else
+            {
+                <div id="note">Wähle einen Topfavoriten aus!</div>
+            }
+            @if (favError)
+            {
+                <div id="note" style="color: #ff5858">
+                    5 von 5 Favoriten ausgewählt.
                 </div>
             }
-        </div>
-        <div id="select-btn-container">
-            <button class="select-btn @(selectFavs ? "highlight" : "")" @onclick="() => selectFavs = true">
-                Favoriten wählen (@GetFavoriteCount()/5)
-            </button>
-            <button class="select-btn @(selectFavs ? "" : "highlight")" @onclick="() => selectFavs = false">
-                Topfavorit wählen (@GetTopfavoriteCount()/1)
-            </button>
-        </div>
-        @if (selectFavs)
-        {
-            <div id="note">Wähle Favoriten aus!</div>
-        }
-        else
-        {
-            <div id="note">Wähle einen Topfavoriten aus!</div>
-        }
-        @if (favError)
-        {
             <div id="note" style="color: #ff5858">
-                5 von 5 Favoriten ausgewählt.
+                @error
             </div>
-        }
-        <div id="note" style="color: #ff5858">
-            @error
-        </div>
-        <button id="submit-btn" @onclick="Btn_Submit">Bewertung absenden</button>
-    </main>
+            <button id="submit-btn" @onclick="Btn_Submit">Bewertung absenden</button>
+        </main>
+    </div>
 
-    <button class="admin-btn" @onclick="GoToLogin" title="Admin Login">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M141.66,133.66l-40,40a8,8,0,0,1-11.32-11.32L116.69,136H24a8,8,0,0,1,0-16h92.69L90.34,93.66a8,8,0,0,1,11.32-11.32l40,40A8,8,0,0,1,141.66,133.66ZM200,32H136a8,8,0,0,0,0,16h56V208H136a8,8,0,0,0,0,16h64a8,8,0,0,0,8-8V40A8,8,0,0,0,200,32Z"></path></svg>
-    </button>
-</div>
-
-<ConfirmationModal @ref="confirmModal"
-                   Title="Bewertung wirklich absenden?"
-                   Message="@modalMessage"
-                   OnYes="SubmitConfirmed"
-                   OnNo="SubmitCanceled">
-</ConfirmationModal>
+    <ConfirmationModal @ref="confirmModal"
+                       Title="Bewertung wirklich absenden?"
+                       Message="@modalMessage"
+                       OnYes="SubmitConfirmed"
+                       OnNo="SubmitCanceled">
+    </ConfirmationModal>
+}
 
 @code {
     List<Dip> dips = [];
@@ -77,10 +90,25 @@
     private string modalMessage = "";
     private string title = "Friends of Award";
     private string error = "";
+    private string userParam = "";
+    private bool qrCodeValid = false;
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
+
+        // Read the "u" parameter from the URL
+        var uri = MyNavMgr.ToAbsoluteUri(MyNavMgr.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("u", out var uValue))
+        {
+            userParam = uValue.ToString();
+        }
+
+        // Check if QR code exists in the database
+        if (!string.IsNullOrEmpty(userParam))
+        {
+            qrCodeValid = Vote.QrCodeExists(userParam);
+        }
 
         List<(int, string)> dpls = DA.GetDAs();
 
@@ -211,9 +239,8 @@
         }
 
 
-
         //qr Code und Title DPLs (erster Topfavorote)
-        Vote.SaveVote("", favouriteIds);
+        error = Vote.SaveVote(userParam, favouriteIds);
 
 
         return Task.CompletedTask;
