@@ -17,10 +17,10 @@ public class DA
     {
         // id und Titel übergabe
         List<(int, string)> result = new List<(int, string)> ();
-
+        string sql = $"SELECT DaId, Titel FROM DA;";
         try
         {
-            DataTable dt = DbWrapper.Wrapper.RunQuery($"SELECT DaId, Titel FROM DA;");
+            DataTable dt = DbWrapper.Wrapper.RunQuery(sql);
             foreach (DataRow row in dt.Rows)
             {
                 int id = Convert.ToInt32(row[0]);
@@ -37,11 +37,11 @@ public class DA
     public static bool SearchAdmin(string username)
     {
         string sql = $"SELECT Benutzername FROM FoA_Admin WHERE Benutzername = '{username}'";
-        DataTable dt = null; 
+        DataTable dt = new DataTable(); 
         try
         {
             dt = DbWrapper.Wrapper.RunQuery(sql);
-            if (dt == null) return false;
+            if (dt.Rows.Count <= 0) return false;
             else return true; 
         }
         catch (Exception ex)
@@ -84,8 +84,8 @@ public class DA
             DbWrapper.Wrapper.RunNonQuery(
                 "CREATE TABLE IF NOT EXISTS FoA_Admin (" +
                 "BenutzerId INT AUTO_INCREMENT," +
-                "Benutzername VARCHAR(50) NOT NULL, UNIQUE" +
-                "Passwort VARCHAR(255) " +
+"Benutzername VARCHAR(50) NOT NULL UNIQUE,"+
+"Passwort VARCHAR(255),"+
                 "PRIMARY KEY(BenutzerId))");
 
             DbWrapper.Wrapper.RunNonQuery(
