@@ -27,7 +27,7 @@
                 </tr>
             }
     </table>
-    <button class="btn btn-primary" @onclick="Btn_Download" disabled="@isWorking">
+    <button type="button" class="btn btn-primary" @onclick="Btn_Download" disabled="@isWorking">
         @(isWorking ? "Erstelle Excel..." : "Excel herunterladen")</button>
 </form>
 </AuthView>
@@ -95,13 +95,24 @@
 
     private async Task Btn_Download()
     {
-        var bytes = CreateExcelFile();
-        var fileName = $"{DateTime.Today.Year}_Ergebnisse_FriendsOfAward.xlsx";
+        try
+        {
+            isWorking = true;
+            StateHasChanged();
+            
+            var bytes = CreateExcelFile();
+            var fileName = $"{DateTime.Today.Year}_Ergebnisse_FriendsOfAward.xlsx";
 
-        await JS.InvokeVoidAsync(
-            "downloadFile",
-            fileName,
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            bytes);
+            await JS.InvokeVoidAsync(
+                "downloadFile",
+                fileName,
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                bytes);
+        }
+        finally
+        {
+            isWorking = false;
+            StateHasChanged();
+        }
     }
 }
