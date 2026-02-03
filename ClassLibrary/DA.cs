@@ -34,7 +34,7 @@ public class DA
         }
         return result;
     }
-    public static bool SearchAdmin(string username)
+    public static bool IsAdmin(string username)
     {
         string sql = $"SELECT Benutzername FROM FoA_Admin WHERE Benutzername = '{username}'";
         DataTable dt = new DataTable(); 
