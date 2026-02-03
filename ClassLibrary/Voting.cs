@@ -50,7 +50,7 @@
                 return "Ungültiger User code";
             }
 
-            int num = DbWrapper.Wrapper.RunNonQuery(@$"INSERT INTO Vote VALUES (NULL, '{qr}',
+            int num = DbWrapper.Wrapper.RunNonQuery(@$"INSERT INTO foa_voting VALUES (NULL, '{qr}',
                 {FormatId(Fav)},
                 {FormatId(DaOther1)},
                 {FormatId(DaOther2)},
