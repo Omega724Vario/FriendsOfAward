@@ -1,13 +1,11 @@
-﻿window.downloadHtmlFile = function (filename, content) {
-    const blob = new Blob([content], { type: "text/html" });
+﻿window.downloadFile = (fileName, contentType, content) => {
+    const blob = new Blob([new Uint8Array(content)], { type: contentType });
     const url = URL.createObjectURL(blob);
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
 
     URL.revokeObjectURL(url);
-}
+};

@@ -28,7 +28,7 @@
     {
         try
         {
-            int num = DbWrapper.Wrapper.RunNonQuery($"INSERT INTO Vote VALUES (NULL, {qr}, {titel[0]}, {titel[1]}, {titel[2]}, {titel[3]},{titel[4]};)");
+            int num = DbWrapper.Wrapper.RunNonQuery($"INSERT INTO foa_Voting VALUES (NULL, {qr}, {titel[0]}, {titel[1]}, {titel[2]}, {titel[3]},{titel[4]};)");
             if (num != 1) return $"Ein Fehler ist aufgetreten! Gespeicherte Votes: {num}";
             return "";
         }
