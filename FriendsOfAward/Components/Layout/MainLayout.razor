@@ -1,7 +1,9 @@
 ﻿@using FriendsOfAward.Components.UI.Theme
+@using FriendsOfAward.Components.Auth;
+@using FriendsOfAward
+@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Navigation
 @inherits LayoutComponentBase
-@* @rendermode InteractiveServer *@
-@* @inject IJSRuntime JS *@
 
 <div class="app-container">
     <nav class="sidebar">
@@ -24,12 +26,8 @@
         </NavLink>
 
         <div class="spacer"></div>
-
-        <div class="sidebar-footer">
-            <button class="ui-btn destructive" @onclick="ResetApp">Reset</button>
-            <ThemeToggle />
-        </div>
-        <div class="ui-card mt">Admin: Max Mustermann</div>
+        
+        <AuthSection />
     </nav>
     <div class="content">
         @Body

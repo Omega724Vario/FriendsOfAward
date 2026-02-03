@@ -6,6 +6,7 @@
 @inject IJSRuntime JS
 
 <PageTitle>Ergebnisse</PageTitle>
+<AuthView>
 <h3>Ergebnisse</h3>
 
 <form>
@@ -29,6 +30,7 @@
     <button class="btn btn-primary" @onclick="Btn_Download" disabled="@isWorking">
         @(isWorking ? "Erstelle Excel..." : "Excel herunterladen")</button>
 </form>
+</AuthView>
 
 @code {
     List<(DA, int count)> voting = new();

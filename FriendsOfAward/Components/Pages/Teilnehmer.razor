@@ -9,6 +9,7 @@
 
 <PageTitle>Teilnehmer</PageTitle>
 
+<AuthView>
 <h2 class="underlined">QR-Codes:</h2>
 
 <div class="input-container">
@@ -47,6 +48,7 @@
         }
     </div>
 }
+</AuthView>
 
 @code {
     private string btnClick = "";
@@ -56,14 +58,7 @@
     private List<string> passwordList = new();
     private string? QrPngBase64;
     private bool isLoading = false;
-
-
-
-    protected override void OnInitialized()
-    {
         base.OnInitialized();
-    }
-
 
     private async Task Btn_QRCodesGenerieren()
     {

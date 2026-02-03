@@ -1,0 +1,15 @@
+﻿.wrapper {
+    width: 100vw;
+    height: 100vh;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    text-align: center;
+}
+
+button {
+    width: 100%;
+}
