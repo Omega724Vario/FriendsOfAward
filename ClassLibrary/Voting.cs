@@ -37,6 +37,24 @@
         }
     }
 
+    /// <summary>
+    /// Checks if a QR code has already been used (exists in the Vote table)
+    /// </summary>
+    /// <param name="qr">The QR code to check</param>
+    /// <returns>True if the QR code has already been used, false otherwise</returns>
+    public static bool HasQrCodeBeenUsed(string qr)
+    {
+        try
+        {
+            object? voteExists = DbWrapper.Wrapper.RunQueryScalar($"SELECT COUNT(*) FROM FoA_Voting WHERE QrId = '{qr}'");
+            return voteExists != null && Convert.ToInt32(voteExists) > 0;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     ///<summary>
     ///(string qrCode, Liste mit id von Diplomarbeiten (erster wert=top-fav)
     ///</summary>
@@ -44,13 +62,17 @@
     {
         try
         {
-            bool validQrCode = QrCodeExists(qr);
-            if (!validQrCode)
+            if (!QrCodeExists(qr))
             {
                 return "Ungültiger User code";
             }
 
-            int num = DbWrapper.Wrapper.RunNonQuery(@$"INSERT INTO foa_voting VALUES (NULL, '{qr}',
+            if (HasQrCodeBeenUsed(qr))
+            {
+                return "Dieser Code wurde bereits verwendet!";
+            }
+
+            int num = DbWrapper.Wrapper.RunNonQuery(@$"INSERT INTO FoA_Voting VALUES (NULL, '{qr}',
                 {FormatId(Fav)},
                 {FormatId(DaOther1)},
                 {FormatId(DaOther2)},

@@ -76,6 +76,10 @@
     overflow: hidden;
     transition-duration: 0.3s;
     outline: 1px solid transparent;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
     .grid-btn:hover {

@@ -113,9 +113,9 @@ public class DA
 
             DbWrapper.Wrapper.RunNonQuery("CREATE TABLE if NOT EXISTS FoA_Voting" +
                 "(VotingId INT NOT NULL AUTO_INCREMENT,QrId VARCHAR(8) NOT NULL," +
-                "Fav INT NOT NULL,DaOther1 INT NOT NULL," +
-                "DaOther2 INT NOT NULL,DaOther3 INT NOT NULL," +
-                "DaOther4 INT NOT NULL,DaOther5 INT NOT NULL," +
+                "Fav INT,DaOther1 INT," +
+                "DaOther2 INT,DaOther3 INT," +
+                "DaOther4 INT,DaOther5 INT," +
                 "PRIMARY KEY(VotingId), FOREIGN KEY(QrId) " +
                 "REFERENCES FoA_QrCodes(QrId) ON DELETE CASCADE," +
                 "FOREIGN KEY(Fav) REFERENCES DA(DaId) ON DELETE CASCADE," +
