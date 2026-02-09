@@ -118,7 +118,7 @@ public class DA
                 "DaOther4 INT,DaOther5 INT," +
                 "PRIMARY KEY(VotingId), FOREIGN KEY(QrId) " +
                 "REFERENCES FoA_QrCodes(QrId) ON DELETE CASCADE," +
-                "FOREIGN KEY(Fav) REFERENCES DA(DaId) ON DELETE CASCADE," +
+                "FOREIGN KEY(Fav) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
                 "FOREIGN KEY(DaOther1) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
                 "FOREIGN KEY(DaOther2) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +
                 "FOREIGN KEY(DaOther3) REFERENCES FoA_DA(DaId) ON DELETE CASCADE," +

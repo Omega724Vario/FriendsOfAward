@@ -21,6 +21,8 @@ builder.Services.AddScoped<AuthenticationStateProvider>(provider =>
 
 var app = builder.Build();
 
+DA.CreateClassesSQL();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
