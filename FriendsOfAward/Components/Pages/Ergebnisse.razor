@@ -1,5 +1,6 @@
 ﻿@page "/Ergebnisse"
 @rendermode InteractiveServer
+@inject NavigationManager NavMananger
 @using static DA
 @using ClosedXML.Excel
 @using System.Data;
@@ -10,24 +11,31 @@
 <h3>Ergebnisse</h3>
 
 <form>
-    <table>
-        <tr>
-            <th>Nr</th>
-            <th>Titel</th>
-            <th>Schüler</th>
-            <th>Count</th>
-        </tr>
-            @foreach((DA, int count) da in voting)
-            {
+    <div class="results-container">
+        <table class="results-table">
+            <thead>
                 <tr>
-                    <th>@da.Item1.ID</th>
-                    <th>@da.Item1.Titel</th>
-                    <th>@da.Item1.Schueler</th>
-                    <th>@da.Item2</th>
+                    <th>Nr</th>
+                    <th>Titel</th>
+                    <th>Schüler</th>
+                    <th>Count</th>
                 </tr>
-            }
-    </table>
-    <button type="button" class="btn btn-primary" @onclick="Btn_Download" disabled="@isWorking">
+            </thead>
+            <tbody>
+                @foreach((DA, int count) da in voting)
+                {
+                    <tr>
+                        <td>@da.Item1.ID</td>
+                        <td>@da.Item1.Titel</td>
+                        <td>@da.Item1.Schueler</td>
+                        <td>@da.Item2</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <button type="button" class="ui-btn primary mr" @onclick="Btn_Download" disabled="@isWorking">
         @(isWorking ? "Erstelle Excel..." : "Excel herunterladen")</button>
 </form>
 </AuthView>
@@ -38,14 +46,26 @@
 
     protected override async Task OnInitializedAsync()
     {
-        //Ergebnisse vom Voting speichern
+        // Ermittelt die Anzahl der Nennungen pro DA über alle Vote-Spalten (Fav + DaOther1..5)
+        string sql = @"
+SELECT d.DaId, d.Titel, d.Schueler,
+       COALESCE(vc.cnt, 0) AS vote_count
+FROM FoA_DA d
+LEFT JOIN (
+    SELECT DaId, COUNT(*) AS cnt FROM (
+        SELECT Fav    AS DaId FROM FoA_Voting WHERE Fav IS NOT NULL
+        UNION ALL SELECT DaOther1 AS DaId FROM FoA_Voting WHERE DaOther1 IS NOT NULL
+        UNION ALL SELECT DaOther2 AS DaId FROM FoA_Voting WHERE DaOther2 IS NOT NULL
+        UNION ALL SELECT DaOther3 AS DaId FROM FoA_Voting WHERE DaOther3 IS NOT NULL
+        UNION ALL SELECT DaOther4 AS DaId FROM FoA_Voting WHERE DaOther4 IS NOT NULL
+        UNION ALL SELECT DaOther5 AS DaId FROM FoA_Voting WHERE DaOther5 IS NOT NULL
+    ) AS t
+    GROUP BY DaId
+) vc ON d.DaId = vc.DaId
+ORDER BY vote_count DESC;";
 
-        string sql = $"SELECT d.DaId, d.Titel, d.Schueler," +
-        "COUNT(v.DaId) AS vote_count FROM foa_da AS d INNER JOIN foa_voting AS v ON d.DaId = v.DaId GROUP BY d.DaId, d.Titel, d.Schueler;";
-        //ID | Titel | Schueler | Count
         DataTable da = DbWrapper.Wrapper.RunQuery(sql);
         DA result;
-        //Schleife für jede DA in Db, pro durchgang wird
         foreach (DataRow row in da.Rows)
         {
             result = new DA((int)row[0], (string)row[1], (string)row[2]);
@@ -56,41 +76,61 @@
 
     private byte[] CreateExcelFile()
     {
-        XLWorkbook? workbook = new XLWorkbook();
-
+        using var workbook = new XLWorkbook();
+        // sortiere nach Count absteigend
         voting = voting
             .OrderByDescending(v => v.count)
             .ToList();
 
-        // Referenz: https://www.youtube.com/watch?v=3DIKSjQMc5U
-            IXLWorksheet worksheet = workbook.Worksheets.Add("FoA_Ergebnisse");
-            worksheet.Cell("A1").Value = "Nr";
-            worksheet.Cell("B1").Value = "Titel";
-            worksheet.Cell("C1").Value = "Schüler";
-            worksheet.Cell("D1").Value = "Count";
+        var worksheet = workbook.Worksheets.Add("FoA_Ergebnisse");
 
-            int nr = 2; 
-            foreach((DA, int) v in voting)
-            {
-                worksheet.Row(nr).Cell("A").Value = v.Item1.ID;
-                worksheet.Row(nr).Cell("B").Value = v.Item1.Titel;
-                worksheet.Row(nr).Cell("C").Value = v.Item1.Schueler;
-                worksheet.Row(nr).Cell("D").Value = v.Item2;
-                nr++; 
-            }
+        // Header
+        worksheet.Cell("A1").Value = "Nr";
+        worksheet.Cell("B1").Value = "Titel";
+        worksheet.Cell("C1").Value = "Schüler";
+        worksheet.Cell("D1").Value = "Count";
 
-            IXLRange? range = worksheet.Range($"A1:D{voting.Count+1}"); 
-            IXLTable table = range.CreateTable(); 
-            table.Theme = XLTableTheme.TableStyleLight10; 
+        // Daten schreiben
+        int row = 2;
+        foreach ((DA, int) v in voting)
+        {
+            worksheet.Cell(row, 1).Value = v.Item1.ID;
+            worksheet.Cell(row, 2).Value = v.Item1.Titel;
+            worksheet.Cell(row, 3).Value = v.Item1.Schueler;
+            worksheet.Cell(row, 4).Value = v.Item2;
+            row++;
+        }
 
-            worksheet.Cell($"A{voting.Count + 1}").Value = "Total Votes: ";
-            worksheet.Cell($"D{voting.Count + 1}").FormulaA1 = $"SUM(D2:D{voting.Count + 1})"; 
+        int lastDataRow = row - 1;         // letzte mit echten Daten
+        int totalRow = lastDataRow + 1;    // Zeile für Total
 
-            worksheet.Row(voting.Count + 1).Style.Font.Bold = true; 
+        // Tabelle nur über die Daten (inkl. Header)
+        if (lastDataRow >= 2)
+        {
+            var dataRange = worksheet.Range(1, 1, lastDataRow, 4);
+            var table = dataRange.CreateTable();
+            table.Theme = XLTableTheme.TableStyleLight10;
+        }
 
-            using var stream = new MemoryStream();
-            workbook.SaveAs(stream);
-            return stream.ToArray();
+        // Total-Zeile (nach den Daten) — vermeidet Überlappung
+        worksheet.Cell(totalRow, 1).Value = "Total Votes:";
+        worksheet.Cell(totalRow, 4).FormulaA1 = $"SUM(D2:D{lastDataRow})";
+        worksheet.Range(totalRow, 1, totalRow, 4).Style.Font.SetBold();
+
+        // Formatierung / Lesbarkeit
+        worksheet.Row(1).Style.Font.SetBold();
+        worksheet.Row(1).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#116ecd"));
+        worksheet.Row(1).Style.Font.SetFontColor(XLColor.White);
+        worksheet.Column(1).Width = 8;
+        worksheet.Column(2).Width = 60;
+        worksheet.Column(3).Width = 30;
+        worksheet.Column(4).Width = 12;
+        worksheet.Columns().AdjustToContents(); // passt Spaltenbreiten an Inhalte an
+        worksheet.SheetView.FreezeRows(1);
+
+        using var stream = new MemoryStream();
+        workbook.SaveAs(stream);
+        return stream.ToArray();
     }
 
     private async Task Btn_Download()

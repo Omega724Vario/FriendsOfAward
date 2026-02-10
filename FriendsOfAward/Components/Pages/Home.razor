@@ -169,7 +169,8 @@ else
 
     // Dynamische Styles: verlängern die Box und erlauben Scroll, wenn die Diploma-Liste offen ist.
     private string WrapperStyle => showDiplomas ? "height:auto; min-height:100vh; overflow:auto;" : "";
-    private string ContentStyle => showDiplomas ? "min-height:72vh;" : "";
+    // Changed: remove max-height limitation and allow visible overflow so the dark content box expands to fit the table
+    private string ContentStyle => showDiplomas ? "min-height:72vh; max-height:none; overflow:visible;" : "";
 
     protected override void OnInitialized()
     {
