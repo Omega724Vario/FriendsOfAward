@@ -1,0 +1,147 @@
+/* Ergebnisse table styling
+   - sticky header that remains fixed while body scrolls
+   - table uses available viewport height but leaves room for the button
+   - full-width table with fixed-layout to keep numbers aligned
+   - increased vertical spacing and stronger zebra striping
+   - supports light/dark via theme variables or prefers-color-scheme
+*/
+
+.results-container {
+    background: var(--card);
+    color: var(--card-foreground);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.5rem;
+    box-shadow: var(--shadow);
+    overflow: auto;
+    /* Use most of the viewport but keep space below for the button and page padding */
+    max-height: calc(100vh - 200px);
+    width: 100%;
+    margin-bottom: 0.75rem; /* space so the button remains visible */
+
+    /* Ensure z-index on sticky header works reliably */
+    isolation: isolate;     
+}
+
+/* Use separate border model so we can add vertical spacing between rows */
+.results-table {
+    width: 100%;
+    table-layout: fixed;        /* prevents cells from resizing while scrolling */
+    border-collapse: separate;
+    border-spacing: 0 10px;     /* vertical gap between rows */
+    font-size: 0.95rem;
+    color: var(--card-foreground);
+    line-height: 1.5;
+    min-width: 720px;           /* avoid extreme squish on very small viewports */
+}
+
+/* Header: sticky and visually prominent */
+.results-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1000; /* large so header is always above row shadows */
+    background: var(--primary);
+    color: var(--primary-foreground);
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    border-bottom: none;
+}
+
+/* Define column proportions (keeps numbers from sliding) */
+.results-table thead th:first-child { width: 6%; min-width: 48px; }
+.results-table thead th:nth-child(2) { width: 54%; } /* title */
+.results-table thead th:nth-child(3) { width: 30%; } /* schüler */
+.results-table thead th:last-child { width: 10%; min-width: 80px; text-align: right; }
+
+/* Row cells: better spacing and "card" look */
+.results-table tbody tr td {
+    padding: 0.85rem 1rem;
+    background-clip: padding-box;
+    vertical-align: top;
+    /* make sure cells sit below the header in stacking order */
+    position: relative;
+    z-index: 0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap; /* ensure numbers and titles don't wrap into multi-lines */
+}
+
+/* Round left/right corners of the "row card" */
+.results-table tbody tr td:first-child {
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+}
+.results-table tbody tr td:last-child {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    text-align: right;
+}
+
+/* Stronger zebra striping for better separation */
+.results-table tbody tr:nth-child(odd) td {
+    background-color: rgba(255,255,255,0.02);
+}
+.results-table tbody tr:nth-child(even) td {
+    background-color: rgba(0,0,0,0.03);
+}
+
+/* Dark theme adjustments using data-theme if available, fallback to prefers-color-scheme */
+[data-theme="dark"] .results-table thead th,
+@media (prefers-color-scheme: dark) {
+    .results-table thead th {
+        background: var(--primary);
+        color: var(--primary-foreground);
+    }
+}
+
+[data-theme="dark"] .results-table tbody tr:nth-child(odd) td,
+@media (prefers-color-scheme: dark) {
+    .results-table tbody tr:nth-child(odd) td {
+        background-color: rgba(255,255,255,0.02);
+    }
+}
+
+[data-theme="dark"] .results-table tbody tr:nth-child(even) td,
+@media (prefers-color-scheme: dark) {
+    .results-table tbody tr:nth-child(even) td {
+        background-color: rgba(255,255,255,0.03);
+    }
+}
+
+/* Total row highlight (if you add class="total-row" in markup) */
+.results-table tbody tr.total-row td {
+    font-weight: 700;
+    background: rgba(17,110,205,0.08);
+}
+
+/* Responsive adjustments: keep header sticky and allow horizontal scroll if needed */
+@media (max-width: 900px) {
+    .results-container {
+        max-height: calc(100vh - 240px);
+    }
+    .results-table {
+        min-width: 640px;
+        border-spacing: 0 8px;
+    }
+    .results-table thead th, .results-table tbody tr td {
+        padding: 0.6rem 0.75rem;
+        font-size: 0.92rem;
+        white-space: nowrap;
+    }
+}
+
+/* Very small screens: allow wrapping of title, keep numeric column aligned */
+@media (max-width: 520px) {
+    .results-table thead th:nth-child(2),
+    .results-table tbody tr td:nth-child(2) {
+        white-space: normal;
+        word-break: break-word;
+    }
+    .results-table thead th:last-child,
+    .results-table tbody tr td:last-child {
+        text-align: right;
+    }
+}

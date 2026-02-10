@@ -13,8 +13,8 @@
 @if (string.IsNullOrEmpty(userParam) || !qrCodeValid)
 {
     <div id="blur-ball"></div>
-    <div id="wrapper">
-        <main id="content">
+    <div id="wrapper" style="@WrapperStyle">
+        <main id="content" style="@ContentStyle">
             <span id="title">@title</span>
             <div id="note">
                 <b>Kein gültiger Zugangslink</b><br />
@@ -39,8 +39,8 @@
 else if (qrCodeAlreadyUsed)
 {
     <div id="blur-ball"></div>
-    <div id="wrapper">
-        <main id="content">
+    <div id="wrapper" style="@WrapperStyle">
+        <main id="content" style="@ContentStyle">
             <span id="title">@title</span>
             <div id="note">
                 <b>QR-Code bereits verwendet</b><br />
@@ -59,8 +59,8 @@ else if (qrCodeAlreadyUsed)
 else
 {
     <div id="blur-ball"></div>
-    <div id="wrapper">
-        <main id="content">
+    <div id="wrapper" style="@WrapperStyle">
+        <main id="content" style="@ContentStyle">
             <span id="title">@title</span>
             <div id="note">
                 <b>
@@ -103,8 +103,43 @@ else
                 @error
             </div>
             <button id="submit-btn" @onclick="Btn_Submit">Bewertung absenden</button>
+   
+            @* Toggle für Diplomarbeiten anzeigen/ausblenden (mobilfreundlich) *@
+            <div style="margin-top: 12px;">
+                <button class="select-btn" @onclick="() => showDiplomas = !showDiplomas" style="width:100%;">
+                    @(showDiplomas ? "Diplomarbeiten verbergen" : "Diplomarbeiten anzeigen")
+                </button>
+            </div>
+
+            @if (showDiplomas)
+            {
+                <div style="margin-top:12px;">
+                    <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+                        <table style="width:100%; border-collapse:collapse; color:#ffffff; background:transparent; font-size:0.95rem;">
+                            <thead>
+                                <tr>
+                                    <th style="text-align:left; padding:10px 8px; border-bottom:1px solid #333;">ID</th>
+                                    <th style="text-align:left; padding:10px 8px; border-bottom:1px solid #333;">Diplomarbeit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var da in dplList)
+                                {
+                                    <tr style="border-bottom:1px solid #222;">
+                                        <td style="padding:10px 8px; vertical-align:top; color:#ffffff; width:72px;">@da.Item1</td>
+                                        <td style="padding:10px 8px; vertical-align:top; color:#ffffff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                                            @da.Item2
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
         </main>
     </div>
+
 
     <ConfirmationModal @ref="confirmModal"
                        Title="Bewertung wirklich absenden?"
@@ -127,6 +162,15 @@ else
     private bool qrCodeAlreadyUsed = false;
     private string manualQrCode = "";
     private string manualEntryError = "";
+
+    // Neu: Liste der eingelesenen Diplomarbeiten, sichtbar in der UI
+    private List<(int, string)> dplList = new();
+    private bool showDiplomas = false;
+
+    // Dynamische Styles: verlängern die Box und erlauben Scroll, wenn die Diploma-Liste offen ist.
+    private string WrapperStyle => showDiplomas ? "height:auto; min-height:100vh; overflow:auto;" : "";
+    // Changed: remove max-height limitation and allow visible overflow so the dark content box expands to fit the table
+    private string ContentStyle => showDiplomas ? "min-height:72vh; max-height:none; overflow:visible;" : "";
 
     protected override void OnInitialized()
     {
@@ -151,21 +195,24 @@ else
             }
         }
 
-        List<(int, string)> dpls = DA.GetDAs();
+        // Populate the shared dplList (was using a local variable before)
+        dplList = DA.GetDAs();
 
-        if (dpls.Count != 20)
+        if (dplList == null || dplList.Count != 20)
         {
+            dplList = new List<(int, string)>();
             for (int i = 0; i < 20; i++)
             {
-
-                dpls.Add((i + 1, Random.Shared.Next(0, 120).ToString()));
+                dplList.Add((i + 1, Random.Shared.Next(0, 120).ToString()));
             }
             error = "ERROR - etwas ist schiefgelaufen";
         }
 
-        for (int i = 0; i < 20; i++)
+        // Ensure dips is empty and fill it from dplList
+        dips.Clear();
+        for (int i = 0; i < dplList.Count; i++)
         {
-            Dip dip = new(dpls[i].Item2, dpls[i].Item1);
+            Dip dip = new(dplList[i].Item2, dplList[i].Item1);
             dips.Add(dip);
         }
     }
@@ -257,7 +304,7 @@ else
         }
         else
         {
-            modalMessage = "Sind Sie sicher, dass Sie das abschicken möchten? Sie können danach nichts mehr auswhälen oder ändern.";
+            modalMessage = "Sind Sie sicher, dass Sie das abschicken möchten? Sie können danach nichts mehr auswählen oder ändern.";
         }
     }
 
@@ -315,6 +362,13 @@ else
         {
             manualEntryError = "Ungültiger QR-Code. Bitte versuchen Sie es erneut.";
         }
+    }
+
+    private void ScrollToDiploma(int id)
+    {
+        // Auf Mobilgeräten könnte man hier z.B. per JS interop zu einem Element scrollen.
+        // Für jetzt kein JS-Aufruf, nur visuelles Feedback möglich.
+        error = $"Angefragte DA-ID: {id}";
     }
 
     class Dip
