@@ -4,9 +4,14 @@
 @inject CustomAuthStateProvider AuthProvider
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
+@inject IJSRuntime JS
 
 <AuthorizeView>
     <Authorized>
+        <button class="ui-btn destructive" style="width: 100% !important;" @onclick="ConfirmReset" title="Reset database">
+            Reset DB
+        </button>
+
         <div class="btn-container">
             <button class="ui-btn destructive mt" @onclick="Logout">Logout</button>
             <ThemeToggle />
@@ -33,4 +38,29 @@
         await AuthProvider.Logout();
         Navigation.NavigateTo("/Login");
     }
+
+    private async Task ConfirmReset()
+    {
+        try
+        {
+            bool ok = await JS.InvokeAsync<bool>("confirm", "Die Datenbank wird komplett zurückgesetzt. Fortfahren?");
+            if (!ok) return;
+
+            var (success, error) = DA.ResetDb();
+            if (success)
+            {
+                await JS.InvokeVoidAsync("alert", "Datenbank erfolgreich zurückgesetzt.");
+                Navigation.NavigateTo("/", forceLoad: true);
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", $"Fehler beim Zurücksetzen: {error}");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Unerwarteter Fehler: {ex.Message}");
+        }
+    }
+
 }
