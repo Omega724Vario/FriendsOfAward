@@ -101,8 +101,20 @@ public class Vote
     {
         //Ergebnisse vom Voting speichern
 
-        string sql = $"SELECT d.DaId, d.Titel, d.Schueler," +
-        "COUNT(v.DaId) AS vote_count FROM foa_da AS d INNER JOIN foa_voting AS v ON d.DaId = v.DaId GROUP BY d.DaId, d.Titel, d.Schueler;";
+        string sql = @"SELECT d.DaId, d.Titel, d.Schueler,
+       COALESCE(vc.cnt, 0) AS vote_count
+FROM FoA_DA d
+LEFT JOIN (
+    SELECT DaId, COUNT(*) AS cnt FROM (
+        SELECT Fav    AS DaId FROM FoA_Voting WHERE Fav IS NOT NULL
+        UNION ALL SELECT DaOther1 AS DaId FROM FoA_Voting WHERE DaOther1 IS NOT NULL
+        UNION ALL SELECT DaOther2 AS DaId FROM FoA_Voting WHERE DaOther2 IS NOT NULL
+        UNION ALL SELECT DaOther3 AS DaId FROM FoA_Voting WHERE DaOther3 IS NOT NULL
+        UNION ALL SELECT DaOther4 AS DaId FROM FoA_Voting WHERE DaOther4 IS NOT NULL
+        UNION ALL SELECT DaOther5 AS DaId FROM FoA_Voting WHERE DaOther5 IS NOT NULL
+    ) AS t
+    GROUP BY DaId
+) vc ON d.DaId = vc.DaId;";
         //ID | Titel | Schueler | Count
         DataTable da = DbWrapper.Wrapper.RunQuery(sql);
         DA result;
