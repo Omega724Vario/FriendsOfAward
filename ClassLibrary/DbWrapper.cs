@@ -35,7 +35,7 @@ public class DbWrapper
 		string db = db_args[2];
 		string userId = db_args[3];
 		string password = db_args[4];
-		connString = $"Server={server};Database={db};" +
+		connString = $"Server={server};Database={db};Port=6603;" +
 								 $"User ID={userId};Password={password};";
 
 		connection = new MySqlConnection(connString);  // eventuell Exception!.
