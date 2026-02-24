@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @inject NavigationManager NavMananger
 @using static DA
+@using static Vote
 @using ClosedXML.Excel
 @using System.Data;
 @inject IJSRuntime JS
@@ -46,102 +47,13 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Ermittelt die Anzahl der Nennungen pro DA über alle Vote-Spalten (Fav + DaOther1..5)
-        string sql = @"
-SELECT d.DaId, d.Titel, d.Schueler,
-       COALESCE(vc.cnt, 0) AS vote_count
-FROM FoA_DA d
-LEFT JOIN (
-    SELECT DaId, COUNT(*) AS cnt FROM (
-        SELECT Fav    AS DaId FROM FoA_Voting WHERE Fav IS NOT NULL
-        UNION ALL SELECT DaOther1 AS DaId FROM FoA_Voting WHERE DaOther1 IS NOT NULL
-        UNION ALL SELECT DaOther2 AS DaId FROM FoA_Voting WHERE DaOther2 IS NOT NULL
-        UNION ALL SELECT DaOther3 AS DaId FROM FoA_Voting WHERE DaOther3 IS NOT NULL
-        UNION ALL SELECT DaOther4 AS DaId FROM FoA_Voting WHERE DaOther4 IS NOT NULL
-        UNION ALL SELECT DaOther5 AS DaId FROM FoA_Voting WHERE DaOther5 IS NOT NULL
-    ) AS t
-    GROUP BY DaId
-) vc ON d.DaId = vc.DaId
-ORDER BY vote_count DESC;";
-
-        DataTable da = DbWrapper.Wrapper.RunQuery(sql);
-        DA result;
-        foreach (DataRow row in da.Rows)
-        {
-            result = new DA((int)row[0], (string)row[1], (string)row[2]);
-            int count = Convert.ToInt32(row[3]);
-            voting.Add((result, count));
-        }
-    }
-
-    private byte[] CreateExcelFile()
-    {
-        using var workbook = new XLWorkbook();
-        // sortiere nach Count absteigend
-        voting = voting
-            .OrderByDescending(v => v.count)
-            .ToList();
-
-        var worksheet = workbook.Worksheets.Add("FoA_Ergebnisse");
-
-        // Header
-        worksheet.Cell("A1").Value = "Nr";
-        worksheet.Cell("B1").Value = "Titel";
-        worksheet.Cell("C1").Value = "Schüler";
-        worksheet.Cell("D1").Value = "Count";
-
-        // Daten schreiben
-        int row = 2;
-        foreach ((DA, int) v in voting)
-        {
-            worksheet.Cell(row, 1).Value = v.Item1.ID;
-            worksheet.Cell(row, 2).Value = v.Item1.Titel;
-            worksheet.Cell(row, 3).Value = v.Item1.Schueler;
-            worksheet.Cell(row, 4).Value = v.Item2;
-            row++;
-        }
-
-        int lastDataRow = row - 1;         // letzte mit echten Daten
-        int totalRow = lastDataRow + 1;    // Zeile für Total
-
-        // Tabelle nur über die Daten (inkl. Header)
-        if (lastDataRow >= 2)
-        {
-            var dataRange = worksheet.Range(1, 1, lastDataRow, 4);
-            var table = dataRange.CreateTable();
-            table.Theme = XLTableTheme.TableStyleLight10;
-        }
-
-        // Total-Zeile (nach den Daten) — vermeidet Überlappung
-        worksheet.Cell(totalRow, 1).Value = "Total Votes:";
-        worksheet.Cell(totalRow, 4).FormulaA1 = $"SUM(D2:D{lastDataRow})";
-        worksheet.Range(totalRow, 1, totalRow, 4).Style.Font.SetBold();
-
-        // Formatierung / Lesbarkeit
-        worksheet.Row(1).Style.Font.SetBold();
-        worksheet.Row(1).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#116ecd"));
-        worksheet.Row(1).Style.Font.SetFontColor(XLColor.White);
-        worksheet.Column(1).Width = 8;
-        worksheet.Column(2).Width = 60;
-        worksheet.Column(3).Width = 30;
-        worksheet.Column(4).Width = 12;
-        worksheet.Columns().AdjustToContents(); // passt Spaltenbreiten an Inhalte an
-        worksheet.SheetView.FreezeRows(1);
-
-        using var stream = new MemoryStream();
-        workbook.SaveAs(stream);
-        return stream.ToArray();
+        voting = Vote.ShowVotings(voting);
     }
 
     private async Task Btn_Download()
     {
-        try
-        {
-            isWorking = true;
-            StateHasChanged();
-            
-            var bytes = CreateExcelFile();
-            var fileName = $"{DateTime.Today.Year}_Ergebnisse_FriendsOfAward.xlsx";
+        var bytes = Vote.CreateExcelFile(voting); 
+        var fileName = $"{DateTime.Today.Year}_Ergebnisse_FriendsOfAward.xlsx";
 
             await JS.InvokeVoidAsync(
                 "downloadFile",
