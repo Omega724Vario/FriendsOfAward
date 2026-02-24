@@ -187,7 +187,7 @@ else
         if (!string.IsNullOrEmpty(userParam))
         {
             qrCodeValid = Vote.QrCodeExists(userParam);
-            
+
             // Check if QR code has already been used
             if (qrCodeValid)
             {
@@ -286,16 +286,16 @@ else
         int favCount = dips.Count(d => d.State == "favorite");
         int topfavCount = dips.Count(d => d.State == "topfavorite");
 
+        if (!(favCount == 5 && topfavCount == 1))
+        {
+            error = "Bitte wähle 5 favoriten und 1 top favorite aus.";
+            return;
+        }
+ 
+        error = "";
+        modalMessage = "Sind Sie sicher, dass Sie das abschicken möchten? Sie können danach nichts mehr ändern.";
         confirmModal.Open();
-
-        if (favCount == 5 && topfavCount == 1)
-        {
-            modalMessage = "Sind Sie sicher, dass Sie das abschicken möchten? Sie können danach nichts mehr ändern.";
-        }
-        else
-        {
-            modalMessage = "Sind Sie sicher, dass Sie das abschicken möchten? Sie können danach nichts mehr auswählen oder ändern.";
-        }
+        
     }
 
     //string conformationDialog;
