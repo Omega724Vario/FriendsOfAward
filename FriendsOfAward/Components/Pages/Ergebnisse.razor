@@ -1,49 +1,45 @@
-﻿@page "/Ergebnisse"
-@rendermode InteractiveServer
-@inject NavigationManager NavMananger
-@using static DA
-@using static Vote
-@using ClosedXML.Excel
+﻿@using ClosedXML.Excel
 @using System.Data;
 @inject IJSRuntime JS
 
 <PageTitle>Ergebnisse</PageTitle>
 <AuthView>
-<h3>Ergebnisse</h3>
+    <h3>Ergebnisse</h3>
 
-<form>
-    <div class="results-container">
-        <table class="results-table">
-            <thead>
-                <tr>
-                    <th>Nr</th>
-                    <th>Titel</th>
-                    <th>Schüler</th>
-                    <th>Count</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach((DA, int count) da in voting)
-                {
+    <form>
+        <div class="results-container">
+            <table class="results-table">
+                <thead>
                     <tr>
-                        <td>@da.Item1.ID</td>
-                        <td>@da.Item1.Titel</td>
-                        <td>@da.Item1.Schueler</td>
-                        <td>@da.Item2</td>
+                        <th>Nr</th>
+                        <th>Titel</th>
+                        <th>Schüler</th>
+                        <th>Count</th>
                     </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    @foreach ((DA, int count) da in voting)
+                    {
+                        <tr>
+                            <td>@da.Item1.ID</td>
+                            <td>@da.Item1.Titel</td>
+                            <td>@da.Item1.Schueler</td>
+                            <td>@da.Item2</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
 
-    <button type="button" class="ui-btn primary mr" @onclick="Btn_Download" disabled="@isWorking">
-        @(isWorking ? "Erstelle Excel..." : "Excel herunterladen")</button>
-</form>
+        <button type="button" class="ui-btn primary mr" @onclick="Btn_Download" disabled="@isWorking">
+            @(isWorking ? "Erstelle Excel..." : "Excel herunterladen")
+        </button>
+    </form>
 </AuthView>
 
 @code {
     List<(DA, int count)> voting = new();
-    private bool isWorking = false; 
+    private bool isWorking = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -52,19 +48,13 @@
 
     private async Task Btn_Download()
     {
-        var bytes = Vote.CreateExcelFile(voting); 
+        var bytes = Vote.CreateExcelFile(voting);
         var fileName = $"{DateTime.Today.Year}_Ergebnisse_FriendsOfAward.xlsx";
 
-            await JS.InvokeVoidAsync(
-                "downloadFile",
-                fileName,
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                bytes);
-        }
-        finally
-        {
-            isWorking = false;
-            StateHasChanged();
-        }
+        await JS.InvokeVoidAsync(
+            "downloadFile",
+            fileName,
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            bytes);
     }
 }
