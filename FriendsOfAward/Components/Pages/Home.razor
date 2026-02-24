@@ -198,16 +198,6 @@ else
         // Populate the shared dplList (was using a local variable before)
         dplList = DA.GetDAs();
 
-        if (dplList == null || dplList.Count != 20)
-        {
-            dplList = new List<(int, string)>();
-            for (int i = 0; i < 20; i++)
-            {
-                dplList.Add((i + 1, Random.Shared.Next(0, 120).ToString()));
-            }
-            error = "ERROR - etwas ist schiefgelaufen";
-        }
-
         // Ensure dips is empty and fill it from dplList
         dips.Clear();
         for (int i = 0; i < dplList.Count; i++)
